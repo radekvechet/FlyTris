@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FlyTris · a fly at the controls</title><style>__STYLE__</style><style>__VERSUS_STYLE__</style><style>__SCORES_STYLE__</style></head>
 <body><main>
-<header><div><div class="eyebrow"><span class="status-dot"></span> CONNECTOME LAB / EXPERIMENT 01</div><h1>FlyTris<span class="title-dot">.</span></h1><p class="intro">A tiny player at the controls.</p></div><div class="header-meta"><span class="badge">__STATUS__</span><p>__NEURONS__ neurons · __EDGES__ connections<br>8 learned output weights</p></div></header>
+<header><div><h1>FlyTris<span class="title-dot">.</span></h1><p class="intro">A tiny player at the controls.</p></div><div class="header-meta"><span class="badge">__STATUS__</span><p>__NEURONS__ neurons · __EDGES__ connections<br>8 learned output weights</p></div></header>
 <section class="replay-card" aria-label="Interactive fly replay">
 <div class="stage-heading"><span><span class="live-dot" id="live-dot"></span><strong id="play-status">READY TO PLAY</strong></span><span class="stage-hint">Drag to look around <button id="reset-view" aria-label="Reset camera view">↺</button></span></div>
 <div class="replay-stage"><div id="fly-stage"><div id="scene-error" hidden>3D rendering is unavailable. The recorded Tetris replay still works on the board alongside.</div><div class="scene-caption"><span class="scene-number">01 /</span><span>THE WIRED PLAYER<small>Six legs. Six connections. One game.</small></span></div></div>
@@ -13,7 +13,7 @@ __FALLING_SUMMARY__
 __SCORES_HTML__
 <div class="results-layout"><section class="card"><div class="section-eyebrow">THE MEASUREMENTS</div><h2>Original placement experiments.</h2><div class="table-scroll"><table><thead><tr><th>Run</th><th>Before</th><th>After</th><th>Gain [95% CI]</th><th>Training</th></tr></thead><tbody>__TABLE__</tbody></table></div><p>Mean lines cleared on identical, unseen piece sequences. These historical trials used placement rules; their results are separate from the current falling-rules checkpoint.</p><div class="stats"><div><strong>__RAW__</strong><small>Trained raw-feature control</small></div><div><strong>__RANDOM__</strong><small>Random placements</small></div></div></section>
 <section class="card explanation"><div class="section-eyebrow">UNDER THE SHELL</div><h2>What actually learns?</h2><p>Board features enter a fixed fly-derived spiking circuit. Eight learned output weights choose a placement from its activity.</p><p class="note">The fly animation illustrates recorded decisions. It is not a biomechanical simulation. Removing recurrent connections did not consistently hurt performance in these trials, so fly wiring has not been shown to be essential.</p><nav><a href="REPORT.md">Protocol ↗</a> · <a href="MEASUREMENTS.md">Hardware and scaling</a> · <a href="results.json">Raw results ↗</a></nav></section></div>
-<footer>FLYTRIS / LOCAL RESEARCH PLAYGROUND<span>Recorded policy. Real connectome data.</span></footer>
+<footer><span>Made by Radek Věchet</span><nav aria-label="Author and project links"><a href="https://x.com/radekvechet" target="_blank" rel="noopener noreferrer">X (Twitter)</a><a href="https://www.linkedin.com/in/radekvechet/" target="_blank" rel="noopener noreferrer">LinkedIn</a><a href="https://github.com/radekvechet/FlyTris" target="_blank" rel="noopener noreferrer">GitHub</a></nav></footer>
 </main>
 __VERSUS_HTML__
 <!-- Bundled Three.js license:
