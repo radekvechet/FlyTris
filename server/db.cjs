@@ -16,7 +16,9 @@ async function getDatabase(){
   return singleton=localDatabase(path.resolve('.local/leaderboard.sqlite'));
 }
 async function migrate(db){
-  const sql=fs.readFileSync(path.join(__dirname,'../db/001_matches.sql'),'utf8');
-  for(const statement of sql.split(';').map(s=>s.trim()).filter(Boolean))await db.query(statement);
+  for(const name of ['001_matches.sql','002_request_limits.sql']){
+    const sql=fs.readFileSync(path.join(__dirname,'../db',name),'utf8');
+    for(const statement of sql.split(';').map(s=>s.trim()).filter(Boolean))await db.query(statement);
+  }
 }
 module.exports={getDatabase,localDatabase,migrate};

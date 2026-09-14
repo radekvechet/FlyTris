@@ -14,7 +14,8 @@
     try{
       const raw=document.cookie.split('; ').find(v=>v.startsWith(cookieName+'='));if(!raw)return;
       const p=JSON.parse(decodeURIComponent(raw.slice(cookieName.length+1)));
-      if(p.version!==2)return;
+      if(![2,3].includes(p.version))return;
+      if(p.version===2&&p.durationMs===180000)p.durationMs=120000;
       const parsed=V.parseBindings(Object.fromEntries(Object.keys(V.defaultBindings).map(a=>[a,(p.bindings[a]||[]).join(',')])));
       bindings=parsed;
       for(const [id,key] of [['human-pace','gravityMs'],['fly-pace','flyMs'],['match-length','durationMs']]){
@@ -23,7 +24,7 @@
     }catch{/* Invalid or unavailable cookies leave safe defaults. */}
   }
   function savePreferences(){
-    const data=encodeURIComponent(JSON.stringify({version:2,bindings,gravityMs:settings.gravityMs,flyMs:settings.flyMs,durationMs:settings.durationMs}));
+    const data=encodeURIComponent(JSON.stringify({version:3,bindings,gravityMs:settings.gravityMs,flyMs:settings.flyMs,durationMs:settings.durationMs}));
     try{document.cookie=`${cookieName}=${data}; Max-Age=31536000; Path=/; SameSite=Lax`;}catch{}
     const saved=document.cookie.split('; ').some(v=>v===cookieName+'='+data);
     $('preferences-status').textContent=saved?'Controls and pace saved in this browser for one year.':'Cookie storage is unavailable here; settings will last for this open page.';
@@ -99,7 +100,7 @@
   async function start(event){
     event.preventDefault();if(!model)return;
     try{bindings=readBindings();}catch(error){$('match-error').textContent=error.message;return;}
-    settings={seed:Number($('seed-input').value)>>>0,gravityMs:Number($('human-pace').value),flyMs:Number($('fly-pace').value),durationMs:Number($('match-length').value),rulesVersion:falling?2:1,bindings:structuredClone(bindings),humanRules:'falling gravity, 500ms lock delay, horizontal kicks',flyRules:falling?'falling-v1, 50ms controls, midair rotation and slides':'trained placement policy'};
+    settings={seed:Number($('seed-input').value)>>>0,gravityMs:Number($('human-pace').value),flyMs:Number($('fly-pace').value),durationMs:Number($('match-length').value),rulesVersion:falling?3:1,bindings:structuredClone(bindings),humanRules:'falling gravity, 500ms lock delay, horizontal kicks',flyRules:falling?'falling-v1, 50ms controls, midair rotation and slides':'trained placement policy'};
     const attempt=++startAttempt;$('match-start').disabled=true;$('match-start').textContent='Preparing match…';
     const registeredSession=await window.FlyScores.begin(settings,model);
     if(attempt!==startAttempt||!opened)return;scoreSession=registeredSession;

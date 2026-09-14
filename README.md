@@ -34,7 +34,7 @@ GPU, full connectome download or new training. Local scores use SQLite in
 - Default controls: A/D or arrows to move; S/Down to soft-drop; W/Up/E/X/Space/Enter
   to rotate clockwise; Q/Z counterclockwise; Shift to hard-drop; P/Escape to pause.
   Edit bindings before a match; preferences are saved in a browser cookie.
-- Easy, Medium and Hard ranked matches last three minutes. Leaderboards show
+- Easy, Medium and Hard ranked matches last two minutes. Leaderboards show
   human and fly scores over 24 hours, seven days, 30 days and all time.
 
 **Current opponent:** the site uses the saved falling-rules checkpoint after 63

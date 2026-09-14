@@ -1,4 +1,4 @@
-const fs=require('node:fs'),path=require('node:path');
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const root=path.join(__dirname,'..'),web=path.join(root,'flytris/web'),data=path.join(root,'site-data');
 const read=f=>fs.readFileSync(path.join(data,f),'utf8'),d=JSON.parse(read('results.json')),model=JSON.parse(read('versus-model.json')),falling=model.task==='falling-v1';
 const mean=games=>games.reduce((n,g)=>n+g.lines,0)/games.length;
@@ -8,9 +8,19 @@ values.FALLING_SUMMARY=falling?read('falling-summary.html'):'';
 if(falling)values.STATUS='Falling-rules checkpoint · evaluated';
 let page=fs.readFileSync(path.join(web,'report.html'),'utf8').replace(/__([A-Z_]+)__/g,(marker,key)=>{if(!(key in values))throw Error('Missing template value: '+key);return String(values[key]).replace(/<\/script/gi,'<\\/script');});
 page=page.replace('<p class="intro">A tiny player at the controls.</p>','<p class="intro">A tiny player at the controls.</p><button id="versus-open" class="primary">Play against the fly ↗</button>');
+// HTML parsers normalize newlines before CSP hashes are checked.
+page=page.replace(/\r\n?/g,'\n');
+const hashes=[...page.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(([,code])=>"'sha256-"+crypto.createHash('sha256').update(code).digest('base64')+"'");
+const csp="default-src 'none'; script-src "+hashes.join(' ')+"; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'";
+page=page.replace('<meta charset="utf-8">','<meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="'+csp+'">');
 fs.mkdirSync(path.join(root,'public'),{recursive:true});for(const name of ['index.html','report.html'])fs.writeFileSync(path.join(root,'public',name),page);
 for(const name of ['REPORT.md','MEASUREMENTS.md','results.json'])fs.copyFileSync(path.join(data,name),path.join(root,'public',name));
 if(falling)for(const name of ['falling-results.json','FALLING_RESULTS.md','falling-replay.json'])fs.copyFileSync(path.join(data,name),path.join(root,'public',name));
 for(const name of ['LICENSE','NOTICE.md'])fs.copyFileSync(path.join(root,name),path.join(root,'public',name));
 fs.copyFileSync(path.join(data,'DATA_NOTICE.md'),path.join(root,'public','DATA_NOTICE.md'));
+for(const item of fs.readdirSync(path.join(root,'public'),{recursive:true,withFileTypes:true})){
+  if(!item.isFile())continue;
+  const content=fs.readFileSync(path.join(item.parentPath,item.name),'utf8'),secret=process.env.DATABASE_URL;
+  if((secret&&(content.includes(secret)||content.includes(JSON.stringify(secret).slice(1,-1))))||/postgres(?:ql)?:\/\/[^\s"'<>]+:[^\s"'<>]+@/i.test(content))throw Error('Refusing to publish database credentials in static assets.');
+}
 console.log('Vercel static build ready; API functions remain server-side.');

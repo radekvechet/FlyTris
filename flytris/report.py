@@ -137,7 +137,7 @@ def pack(out, include_data=False, run='runs/local'):
     files.extend((ROOT/'tests').glob('*.cjs'))
     for folder in ['api','server','db','scripts','site-data']:
         files.extend(p for p in (ROOT/folder).rglob('*') if p.is_file())
-    for name in ['package.json','package-lock.json','vercel.json','DEPLOYMENT.md','.env.example']:
+    for name in ['package.json','package-lock.json','vercel.json','DEPLOYMENT.md','SECURITY.md','.env.example']:
         if (ROOT/name).exists(): files.append(ROOT/name)
     for name in ['README.md','EXPERIMENTS.md','OVERNIGHT.md','FALLING_TRAINING.md','RUN_OVERNIGHT.cmd','STOP_TRAINING.cmd','requirements.txt','requirements-gpu.txt','setup.ps1','setup.sh','NOTICE.md','LICENSE','.gitignore']:
         if (ROOT/name).exists(): files.append(ROOT/name)

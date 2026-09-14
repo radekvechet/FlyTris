@@ -1,9 +1,8 @@
 # Vercel + Neon scorebook
 
-The game is ready for Vercel, but this workspace is **not deployed** and no hosted
-database has been provisioned. The current preview uses a persistent local SQLite
-database at `.local/leaderboard.sqlite`. This file and all test scores are excluded
-from Git, public assets, and the portable ZIP.
+Production is hosted at **https://flytris.net** on Vercel with Neon Postgres.
+Local development uses SQLite at `.local/leaderboard.sqlite`. Local scores,
+credentials and environment files are excluded from Git and public assets.
 
 ## Deploy
 
@@ -15,7 +14,7 @@ from Git, public assets, and the portable ZIP.
    the project. Set its connection string as server-only `DATABASE_URL`. Use
    separate database branches for Production and Preview; never expose the URL in
    browser code or prefix it with a public-environment-variable convention.
-3. Redeploy. The build runs the idempotent schema in `db/001_matches.sql` when
+3. Redeploy. The build runs the idempotent schemas in `db/001_matches.sql` and `db/002_request_limits.sql` when
    `DATABASE_URL` is present. A migration failure fails the build. Without the
    connection, the page can build but score APIs return an unavailable response and
    games are unranked. There is no ephemeral SQLite fallback on Vercel.
@@ -50,7 +49,7 @@ To run migrations separately with a server environment configured, use
 
 ## Rules and stored data
 
-- Ranked matches use fixed three-minute presets: Easy (800 ms gravity), Medium
+- Ranked matches use fixed two-minute presets: Easy (800 ms gravity), Medium
   (500 ms), Hard (250 ms), applied to both players. The fly executes trained routes
   in 50 ms control steps. Both simulation clocks wait during worker planning.
   Custom gravity or duration settings are practice.
@@ -69,24 +68,27 @@ To run migrations separately with a server environment configured, use
   month), and all time. Boundaries use UTC milliseconds; displayed dates use the
   viewer's local timezone. Chart totals cover *all* matching completed games,
   not just the top ten, and can be filtered by difficulty.
-- New sessions explicitly use `rules_version=2`. Old rows remain in the database
-  under version 1 and are excluded from the new leaderboards and chart totals.
+- New sessions explicitly use `rules_version=3` (two-minute falling matches). Old rows remain in the database
+  under versions 1 and 2 and are excluded from the new leaderboards and chart totals.
   No destructive migration is needed. The stored model ID includes readout weights,
   graph, controller and rules, so changing weights invalidates stale clients.
-  Current charts aggregate models within the same rule version.
+  Current charts aggregate models within the same rule version. The trained policy
+  and historical three-minute evaluation are unchanged; match duration is enforced
+  independently by the versioned server preset. Older open clients must reload.
 
 ## Validation and operational limits
 
 The server validates tokens, presets, time bounds, row-clear totals, board block
 conservation, and plausible placement counts. Both scores are committed together,
-SQL values are parameterized, bodies are limited to 20 KB, and cross-site browser
-submissions are rejected. Database credentials remain server-side.
+SQL values are parameterized, bodies are limited to 20 KB, and browser
+requests must originate from an allowed domain. Database credentials remain server-side.
 
 This is a casual, client-submitted scorebook. It is **not cheat-proof**: a modified
 client can still fabricate a plausible game. There is no account verification or
-server replay verification. Before opening a popular public competition, add
-Vercel Firewall rate limits to the score endpoint, moderation and replay-based
-verification as needed. Abandoned session rows can be periodically deleted after
+server replay verification. Application rate limits and a short leaderboard cache are enabled. Add the
+Vercel edge rule described in [SECURITY.md](SECURITY.md) to reject excess traffic
+before function execution. Moderation and replay-based verification can be added
+for public competitions. Abandoned session rows can be periodically deleted after
 two hours; completed matches are retained for the overall leaderboard.
 
 Local automated tests cover atomic completion, duplicate retries, anonymous names,
@@ -97,3 +99,6 @@ Neon connection for a live integration test; it has not been exercised here.
 Official references: [Vercel Node.js functions](https://vercel.com/docs/functions/runtimes/node-js),
 [Vercel configuration](https://vercel.com/docs/project-configuration),
 [Neon serverless driver](https://neon.com/docs/serverless/serverless-driver).
+
+See [SECURITY.md](SECURITY.md) for allowed origins, rate limits, credential handling
+and the remaining Vercel dashboard setup.

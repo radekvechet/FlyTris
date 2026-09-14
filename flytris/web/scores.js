@@ -1,6 +1,6 @@
 (function(){
   'use strict';const $=id=>document.getElementById(id);
-  const presets={easy:{gravityMs:800,flyMs:800,durationMs:180000},medium:{gravityMs:500,flyMs:500,durationMs:180000},hard:{gravityMs:250,flyMs:250,durationMs:180000}};
+  const presets={easy:{gravityMs:800,flyMs:800,durationMs:120000},medium:{gravityMs:500,flyMs:500,durationMs:120000},hard:{gravityMs:250,flyMs:250,durationMs:120000}};
   let pending=null,savePromise=null,generation=0,loading=0;
   async function api(body){
     const response=await fetch('/api/scores',{method:'POST',keepalive:body.action==='finish',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(10000)});
@@ -8,7 +8,7 @@
   }
   const level=s=>Object.keys(presets).find(key=>Object.entries(presets[key]).every(([k,v])=>s[k]===v))||'custom';
   function syncPreset(){const s={gravityMs:Number($('human-pace').value),flyMs:Number($('fly-pace').value),durationMs:Number($('match-length').value)};$('match-difficulty').value=level(s);$('seed-input').disabled=level(s)!=='custom';$('ranking-note').textContent=level(s)==='custom'?'Custom practice · excluded from high scores.':'Ranked preset · a fresh seed is assigned by the server; both scores are recorded.';}
-  $('match-difficulty').addEventListener('change',()=>{const p=presets[$('match-difficulty').value];if(p){$('human-pace').value=p.gravityMs;$('fly-pace').value=p.flyMs;$('match-length').value=p.durationMs;}else{$('seed-input').disabled=false;$('ranking-note').textContent='Choose your pace below. Only exact three-minute presets enter high scores.';return;}syncPreset();});
+  $('match-difficulty').addEventListener('change',()=>{const p=presets[$('match-difficulty').value];if(p){$('human-pace').value=p.gravityMs;$('fly-pace').value=p.flyMs;$('match-length').value=p.durationMs;}else{$('seed-input').disabled=false;$('ranking-note').textContent='Choose your pace below. Only exact two-minute presets enter high scores.';return;}syncPreset();});
   for(const id of ['human-pace','fly-pace','match-length'])$(id).addEventListener('change',syncPreset);
   function format(n){return Number(n).toLocaleString();}
   async function refresh(){
@@ -26,7 +26,7 @@
       $('score-ring').setAttribute('aria-label',`Humans cleared ${s.human_lines} lines; fly cleared ${s.fly_lines} lines, across ${s.matches} matches.`);
       $('score-total').textContent=format(total);$('total-human').textContent=format(s.human_lines)+(s.human_lines===1?' line':' lines');$('total-fly').textContent=format(s.fly_lines)+(s.fly_lines===1?' line':' lines');$('score-match-count').textContent=`${format(s.matches)} completed ${s.matches===1?'match':'matches'}`;
       $('score-wins').textContent=`Wins: human ${s.human_wins} · fly ${s.fly_wins} · draws ${s.draws}`;
-      $('scores-status').textContent=(d.storage==='local'?'Local score database · ':'')+'Falling rules · Updated '+new Date(d.generatedAt).toLocaleTimeString();
+      $('scores-status').textContent=(d.storage==='local'?'Local score database · ':'')+'Two-minute falling rules · Updated '+new Date(d.generatedAt).toLocaleTimeString();
     }catch{if(request!==loading)return;$('scores-status').textContent='Scorebook offline. Connect the score database to enable shared high scores.';for(const key of Object.keys(presets)){const body=$('scores-'+key);body.replaceChildren();const cell=body.insertRow().insertCell();cell.colSpan=3;cell.className='score-empty';cell.textContent='Scores unavailable.';}}
   }
   async function save(){
@@ -43,7 +43,7 @@
   window.FlyScores={syncPreset,refresh,async begin(settings,model){
     if(model.task!=='falling-v1')return null;
     const difficulty=level(settings);if(difficulty==='custom'||$('match-difficulty').value==='custom')return null;
-    try{return await api({action:'start',difficulty,modelHash:model.metadata.model_sha256});}catch{return null;}
+    try{return await api({action:'start',difficulty,rulesVersion:settings.rulesVersion,modelHash:model.metadata.model_sha256});}catch{return null;}
   },complete(result,session){
     generation++;savePromise=null;pending=null;$('score-player-name').value='';$('score-name-save').disabled=true;$('score-retry').hidden=true;
     if(!session||result.reason==='error'){$('score-name-status').textContent='Unranked match: custom settings or the score service was unavailable at the start.';return;}

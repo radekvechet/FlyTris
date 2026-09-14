@@ -8,8 +8,21 @@ test('released snapshot, evaluated model and browser physics agree',()=>{
   assert.equal(results.summary.afterMean,results.pairs.reduce((n,p)=>n+p.after.lines,0)/24);
 });
 test('static build includes exactly one current-model summary and valid inline scripts',()=>{
-  require('../scripts/build.cjs');const html=fs.readFileSync('public/index.html','utf8');
+  const sentinel='postgresql://build-check:fake-only@invalid.example/test';
+  require('node:child_process').execFileSync(process.execPath,['scripts/build.cjs'],{env:{...process.env,DATABASE_URL:sentinel}});
+  const html=fs.readFileSync('public/index.html','utf8');assert(!html.includes(sentinel));
   assert.equal((html.match(/aria-label="Current falling-rules model"/g)||[]).length,1);
-  assert(!html.includes('__FALLING_'));for(const [,code] of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g))assert.doesNotThrow(()=>new vm.Script(code));
+  assert(!html.includes('__FALLING_'));
+  const csp=html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)[1];
+  assert(csp.includes("connect-src 'self'"));assert(!csp.includes('unsafe-eval'));
+  for(const [,code] of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)){
+    assert.doesNotThrow(()=>new vm.Script(code));assert(csp.includes("'sha256-"+crypto.createHash('sha256').update(code).digest('base64')+"'"));
+  }
+  assert(html.includes('<option value="120000" selected>2 minutes</option>'));
   for(const file of ['FALLING_RESULTS.md','falling-results.json','falling-replay.json','LICENSE','NOTICE.md','DATA_NOTICE.md'])assert(fs.existsSync('public/'+file),file);
+});
+test('publishing fails if a credential URL is accidentally included in public files',()=>{
+  const file='public/credential-leak-test.txt';fs.writeFileSync(file,'postgresql://fake:credential@invalid.example/test');
+  try{assert.throws(()=>require('node:child_process').execFileSync(process.execPath,['scripts/build.cjs'],{stdio:'pipe'}),e=>String(e.stderr).includes('Refusing to publish database credentials'));}
+  finally{fs.unlinkSync(file);}
 });
