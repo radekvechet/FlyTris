@@ -113,8 +113,27 @@ See [FALLING_TRAINING.md](FALLING_TRAINING.md) for the full protocol and limitat
 The web app supports Vercel with Neon Postgres for shared scores. Python training
 continues on a local machine or compute host. See [DEPLOYMENT.md](DEPLOYMENT.md).
 Set `DATABASE_URL` in the hosting environment; `.env.example` contains only a
-placeholder. The scorebook is intended for casual play and does not verify full
-replays on the server.
+placeholder. Ranked games submit input batches every ten simulated seconds;
+the server replays both boards and derives the final scores. This verifies legal
+gameplay and timing, but cannot prove a human supplied the controls.
+
+With `DATABASE_URL` configured, the build automatically runs the idempotent
+schema files in order: [matches](db/001_matches.sql),
+[request limits](db/002_request_limits.sql), and [checkpoints](db/003_checkpoints.sql).
+They can also be run manually in Neon's SQL Editor in that order. These scripts
+create missing tables and indexes; they do not alter existing columns or erase
+test data. Future changes to existing tables need explicit migrations.
+
+The application currently stores keyed IP hashes for rate limiting, not raw IP
+addresses or an IP history attached to matches. Raw-IP storage, a separate
+`IP_HASH_SECRET`, and automatic 30-day cleanup are proposed improvements and are
+not implemented. See [SECURITY.md](SECURITY.md) for current protections and the
+Vercel firewall configuration that must be applied separately.
+
+Optional Neon agent skills can be installed with
+`npx neon@latest skills -s neon -s neon-postgres -y`. Installing the skills does
+not authenticate the CLI or grant database access. They are not needed to run
+the app or deploy with a server-side `DATABASE_URL`.
 
 ## Repository layout
 
@@ -122,12 +141,13 @@ replays on the server.
 |---|---|
 | `flytris/` | Python training, graph extraction, benchmarks and reports |
 | `flytris/web/` | Browser game, procedural animation and falling physics/controller |
-| `scripts/` | Site builds, local server, training workers and orchestration |
-| `api/`, `server/`, `db/` | Score API, storage adapters and database schema |
+| `app/` | Next.js server-rendered pages, metadata and score API route |
+| `scripts/` | Site builds, training workers and orchestration |
+| `server/`, `db/` | Ranked verification, storage adapters and database schema |
 | `site-data/` | Small public model/report snapshot used by the web build |
 | `tests/` | Physics, training, replay and scorebook checks |
 | `data/source.json` | Pinned upstream URLs and SHA-256 provenance |
-| `runs/`, `.local/`, `public/` | Generated local files; excluded from Git |
+| `runs/`, `.local/`, `public/`, `.generated/`, `.next/` | Generated local files; excluded from Git |
 
 ## Verification
 

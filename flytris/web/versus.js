@@ -9,7 +9,22 @@
   let rankedLog='',rankedSequence=0,rankedVerifiedMs=0,rankedWaiting=false,rankedControls=0,rankedHard=false;
   const held=new Map(),cookieName='flytris_preferences_v2';let touchSoft=false;
   function clearHeld(){held.clear();touchSoft=false;}
-  function showBindings(){for(const action of Object.keys(bindings))$('key-'+action).value=bindings[action].map(V.keyLabel).join(', ');}
+  const keySymbols={ArrowLeft:'←',ArrowRight:'→',ArrowUp:'↑',ArrowDown:'↓',Space:'Space',Enter:'↵ Enter',Escape:'Esc',ShiftLeft:'⇧ Left',ShiftRight:'⇧ Right'};
+  function keycaps(keys){
+    const fragment=document.createDocumentFragment();
+    for(const key of keys){
+      const cap=document.createElement('kbd');cap.className='keyboard-key';
+      cap.textContent=keySymbols[key]||V.keyLabel(key);cap.title=V.keyLabel(key);cap.setAttribute('aria-label',V.keyLabel(key));fragment.append(cap);
+    }
+    return fragment;
+  }
+  function previewBinding(action){
+    const input=$('key-'+action);let preview=input.parentNode.querySelector('.key-preview');
+    if(!preview){preview=document.createElement('span');preview.className='key-preview';preview.setAttribute('aria-hidden','true');input.before(preview);}
+    const keys=input.value.split(',').map(key=>key.trim()).filter(Boolean);
+    preview.replaceChildren(keycaps(keys));
+  }
+  function showBindings(){for(const action of Object.keys(bindings)){$('key-'+action).value=bindings[action].map(V.keyLabel).join(', ');previewBinding(action);}}
   function readBindings(){return V.parseBindings(Object.fromEntries(Object.keys(V.defaultBindings).map(action=>[action,$('key-'+action).value])));}
   function loadPreferences(){
     try{
@@ -30,7 +45,14 @@
     const saved=document.cookie.split('; ').some(v=>v===cookieName+'='+data);
     $('preferences-status').textContent=saved?'Controls and pace saved in this browser for one year.':'Cookie storage is unavailable here; settings will last for this open page.';
   }
-  function controlHint(){return [['left','Left'],['right','Right'],['soft','Soft drop'],['rotate','↻'],['reverse','↺'],['hard','Hard drop'],['pause','Pause']].filter(([a])=>bindings[a].length).map(([a,label])=>`${label}: ${bindings[a].map(V.keyLabel).join('/')}`).join(' · ');}
+  function controlHint(){
+    const fragment=document.createDocumentFragment();
+    for(const [action,label] of [['left','Left'],['right','Right'],['soft','Soft drop'],['rotate','Rotate clockwise'],['reverse','Rotate counterclockwise'],['hard','Hard drop'],['pause','Pause']]){
+      if(!bindings[action].length)continue;
+      const group=document.createElement('span');group.className='keyboard-action';group.append(document.createTextNode(label+' '),keycaps(bindings[action]));fragment.append(group);
+    }
+    return fragment;
+  }
   const idle=board=>({board,rows:[],flash:0,shake:0,controls:[0,0,0,0,0,0],lines:0,pieces:0,cleared:0,action:null});
   const clock=ms=>{const s=Math.ceil(Math.max(0,ms)/1000);return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;};
   function stopWorker(){requestId++;worker?.terminate();worker=null;}
@@ -108,7 +130,7 @@
     if(attempt!==startAttempt||!opened)return;scoreSession=registeredSession;
     $('match-start').disabled=false;$('match-start').textContent='Start match →';
     if(scoreSession){settings.seed=scoreSession.seed;settings.difficulty=scoreSession.difficulty;settings.ranked=true;}else{settings.ranked=false;}
-    savePreferences();$('keyboard-hint').textContent=controlHint();
+    savePreferences();$('keyboard-hint').replaceChildren(controlHint());
     const seq=new V.Sequence(settings.seed);human=new V.FallingPlayer(seq,shapes,settings.gravityMs);
     bot=falling?new FlyFallingLive.Controller(settings.seed,shapes,settings.flyMs):null;fly=falling?bot.player:new V.Player(seq,shapes);
     stopWorker();
@@ -164,6 +186,7 @@
     b.addEventListener('click',e=>{if(e.detail===0)control('soft');});
   });
   $('keys-reset').addEventListener('click',()=>{bindings=structuredClone(V.defaultBindings);showBindings();$('match-error').textContent='';});
+  for(const action of Object.keys(bindings))$('key-'+action).addEventListener('input',()=>previewBinding(action));
   $('match-download').addEventListener('click',()=>{if(!lastResult)return;const url=URL.createObjectURL(new Blob([JSON.stringify(lastResult,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`flytris-match-${lastResult.settings.seed}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
   document.addEventListener('keydown',e=>{
     if(!opened)return;
