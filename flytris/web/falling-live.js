@@ -66,8 +66,9 @@
     advance(ms){if(!this.playing)return;this.elapsed+=Math.max(0,ms);while(this.position<this.frames.length&&this.elapsed>=this.frames[this.position].duration){this.elapsed-=this.frames[this.position].duration;this.position++;if(this.single||this.position===this.frames.length){this.elapsed=0;this.playing=false;this.single=false;break;}}}
     sample(){const f=this.frames[this.position];if(!f)return sample(this.final,this.total);const i=Math.min(f.states.length-1,Math.floor(this.elapsed/F.CONTROL_MS));return sample(f.states[i],f.start+this.elapsed);}
   }
-  const controlTickMs=difficulty=>difficulty==='medium'?100:50;
+  const config=typeof module!=='undefined'&&module.exports?require('../../game-config.json'):root.FLYTRIS_CONFIG;
+  const controlTickMs=difficulty=>config.presets[difficulty]?.flyControlMs||50;
   const actionIndex=(elapsedMs,tickMs)=>elapsedMs>0&&elapsedMs%tickMs===0?elapsedMs/tickMs-1:null;
-  const api={Controller,ReplayTimeline,plan,snapshot,restore,controlTickMs,actionIndex,RANKED_RULES:5};
+  const api={Controller,ReplayTimeline,plan,snapshot,restore,controlTickMs,actionIndex,RANKED_RULES:config.rulesVersion};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.FlyFallingLive=api;
 })(typeof window!=='undefined'?window:globalThis);

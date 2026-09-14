@@ -1,4 +1,5 @@
 // Preserve the standalone research report while preparing an SSR shell and cached assets.
+require('./ensure-ranked-pool.cjs');
 require('./build.cjs');
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const root=path.resolve(__dirname,'..'),publicDir=path.join(root,'public');

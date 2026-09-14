@@ -1,15 +1,32 @@
 (function(){
   'use strict';const $=id=>document.getElementById(id);
-  const presets={easy:{gravityMs:800,flyMs:800,durationMs:120000},medium:{gravityMs:500,flyMs:500,durationMs:120000},hard:{gravityMs:250,flyMs:250,durationMs:120000}};
+  const config=window.FLYTRIS_CONFIG,presets=config.presets;
+  const fields={'human-pace':'gravityMs','fly-pace':'flyMs','fly-control-pace':'flyControlMs','match-length':'durationMs'};
   let pending=null,savePromise=null,generation=0,loading=0;
   async function api(body){
     const response=await fetch('/api/scores',{method:'POST',keepalive:body.action==='finish',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(10000)});
     const data=await response.json();if(!response.ok)throw Error(data.error||'Could not save scores.');return data;
   }
+  const readSettings=()=>Object.fromEntries(Object.entries(fields).map(([id,key])=>[key,Number($(id).value)]));
   const level=s=>Object.keys(presets).find(key=>Object.entries(presets[key]).every(([k,v])=>s[k]===v))||'custom';
-  function syncPreset(){const s={gravityMs:Number($('human-pace').value),flyMs:Number($('fly-pace').value),durationMs:Number($('match-length').value)};$('match-difficulty').value=level(s);$('seed-input').disabled=level(s)!=='custom';$('ranking-note').textContent=level(s)==='custom'?'Custom practice · excluded from high scores.':'Ranked preset · '+(level(s)==='medium'?'fly at half speed (100 ms controls, 1,000 ms gravity). ':'fly controls every 50 ms. ')+'Both scores are recorded.';}
-  $('match-difficulty').addEventListener('change',()=>{const p=presets[$('match-difficulty').value];if(p){$('human-pace').value=p.gravityMs;$('fly-pace').value=p.flyMs;$('match-length').value=p.durationMs;}else{$('seed-input').disabled=false;$('ranking-note').textContent='Choose your pace below. Only exact two-minute presets enter high scores.';return;}syncPreset();});
-  for(const id of ['human-pace','fly-pace','match-length'])$(id).addEventListener('change',syncPreset);
+  function applyPreset(difficulty){
+    const p=presets[difficulty];if(!p)return;
+    if(![...$('match-length').options].some(o=>Number(o.value)===p.durationMs))$('match-length').add(new Option(`${p.durationMs/1000} seconds`,p.durationMs));
+    for(const [id,key] of Object.entries(fields))$(id).value=p[key];
+    syncPreset();
+  }
+  function syncPreset(){
+    const s=readSettings(),difficulty=level(s);$('match-difficulty').value=difficulty;$('seed-input').disabled=difficulty!=='custom';
+    $('ranking-note').textContent=(difficulty==='custom'?'Custom practice. ':'Default '+difficulty+' difficulty. ')+`Fly controls: ${s.flyControlMs} ms; effective fly gravity: ${s.flyMs*s.flyControlMs/50} ms. Only default difficulty values qualify for the leaderboard.`;
+  }
+  $('match-difficulty').addEventListener('change',()=>{const difficulty=$('match-difficulty').value;if(presets[difficulty])applyPreset(difficulty);else{$('seed-input').disabled=false;$('ranking-note').textContent='Custom practice. Only default difficulty values qualify for the leaderboard.';}});
+  for(const id of Object.keys(fields)){ $(id).addEventListener('change',syncPreset);$(id).addEventListener('input',syncPreset); }
+  applyPreset(config.defaultDifficulty);
+  for(const [difficulty,p] of Object.entries(presets)){
+    const heading=$('scores-'+difficulty).closest('section').querySelector('h3 small');
+    heading.textContent=`${p.gravityMs} ms human gravity · ${p.flyControlMs} ms fly controls`;
+  }
+  document.querySelector('.score-context').textContent='The same trained weights play every difficulty. Fly control ticks: '+Object.entries(presets).map(([level,p])=>`${level} ${p.flyControlMs} ms`).join(' · ')+'. Totals include matches verified under the current rules; earlier scores are preserved separately.';
   function format(n){return Number(n).toLocaleString();}
   async function refresh(){
     const request=++loading;$('scores-status').textContent='Loading scores…';
@@ -36,16 +53,16 @@
   }
   $('score-name-save').addEventListener('click',async()=>{
     if(!pending||!pending.saved)return;const current=pending,id=generation;$('score-name-save').disabled=true;
-    try{const d=await api({action:'rename',id:current.session.id,token:current.session.token,name:$('score-player-name').value});if(id!==generation)return;$('score-name-status').textContent=`Saved as ${d.name}. Both scores are in the scorebook.`;refresh();}catch(error){if(id===generation)$('score-name-status').textContent='Name not saved: '+error.message;}finally{if(id===generation)$('score-name-save').disabled=false;}
+    try{const d=await api({action:'rename',id:current.session.id,token:current.session.token,name:$('score-player-name').value});if(id!==generation)return;$('score-name-entry').hidden=true;$('score-name-status').classList.add('score-congratulations');$('score-name-status').textContent=`Congratulations ${d.name}. You're #${d.rank} in today's scoreboard on ${d.difficulty} difficulty.`;refresh();}catch(error){if(id===generation)$('score-name-status').textContent='Name not saved: '+error.message;}finally{if(id===generation)$('score-name-save').disabled=false;}
   });
   $('score-retry').addEventListener('click',save);
   $('scores-refresh').addEventListener('click',refresh);for(const id of ['scores-window','scores-difficulty'])$(id).addEventListener('change',refresh);
-  window.FlyScores={syncPreset,refresh,checkpoint(session,sequence,commands){return api({action:'checkpoint',id:session.id,token:session.token,sequence,commands});},async begin(settings,model){
+  window.FlyScores={syncPreset,readSettings,refresh,checkpoint(session,sequence,commands){return api({action:'checkpoint',id:session.id,token:session.token,sequence,commands});},async begin(settings,model){
     if(model.task!=='falling-v1')return null;
     const difficulty=level(settings);if(difficulty==='custom'||$('match-difficulty').value==='custom')return null;
     try{return await api({action:'start',difficulty,rulesVersion:settings.rulesVersion,modelHash:model.metadata.model_sha256});}catch{return null;}
   },complete(result,session,verify){
-    generation++;savePromise=null;pending=null;$('score-player-name').value='';$('score-name-save').disabled=true;$('score-retry').hidden=true;
+    generation++;savePromise=null;pending=null;$('score-name-entry').hidden=!session||result.reason==='error';$('score-name-status').classList.remove('score-congratulations');$('score-player-name').value='';$('score-name-save').disabled=true;$('score-retry').hidden=true;
     if(!session||result.reason==='error'){$('score-name-status').textContent='Unranked match: custom settings or the score service was unavailable at the start.';return;}
     pending={result,session,verify,saved:false};$('score-name-status').textContent='Saving both scores as anonymous…';save();
   }};

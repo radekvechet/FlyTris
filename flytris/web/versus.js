@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const $=id=>document.getElementById(id),V=window.FlyVersus,shapes=window.FLYTRIS_SHAPES,model=window.FLYTRIS_MODEL;
+  const $=id=>document.getElementById(id),V=window.FlyVersus,K=window.FlyKeyBindings,shapes=window.FLYTRIS_SHAPES,model=window.FLYTRIS_MODEL;
   const arena=$('versus'),report=document.querySelector('main'),stage=$('fly-stage'),home=stage.parentNode,anchor=stage.nextSibling;
   const humanCtx=$('human-board').getContext('2d'),flyCtx=$('fly-board').getContext('2d'),view=window.FlyReport;
   const falling=model?.task==='falling-v1';let bot=null,clockRemainder=0;
@@ -18,33 +18,57 @@
     }
     return fragment;
   }
-  function previewBinding(action){
-    const input=$('key-'+action);let preview=input.parentNode.querySelector('.key-preview');
-    if(!preview){preview=document.createElement('span');preview.className='key-preview';preview.setAttribute('aria-hidden','true');input.before(preview);}
-    const keys=input.value.split(',').map(key=>key.trim()).filter(Boolean);
-    preview.replaceChildren(keycaps(keys));
+  let captureAction=null;
+  const capture=$('key-capture');
+  function showBindings(){
+    const fragment=document.createDocumentFragment(),missing=K.missing(bindings);
+    for(const [action,label] of Object.entries(K.actions)){
+      const group=document.createElement('div');group.className='key-group'+(missing.includes(action)?' missing':'');group.setAttribute('role','group');group.setAttribute('aria-label',label);
+      const heading=document.createElement('strong');heading.textContent=label;group.append(heading);
+      const keys=document.createElement('div');keys.className='key-preview';
+      for(const code of bindings[action]){
+        const remove=document.createElement('button');remove.type='button';remove.className='key-remove';remove.setAttribute('aria-label',`Remove ${V.keyLabel(code)} from ${label}`);remove.title=remove.getAttribute('aria-label');remove.append(keycaps([code]));
+        const cross=document.createElement('span');cross.className='key-cross';cross.textContent='×';cross.setAttribute('aria-hidden','true');remove.append(cross);
+        remove.addEventListener('click',()=>{bindings[action]=bindings[action].filter(k=>k!==code);showBindings();savePreferences();$('key-add-'+action).focus();});keys.append(remove);
+      }
+      const add=document.createElement('button');add.type='button';add.className='key-add';add.id='key-add-'+action;add.textContent='+ Add key';add.setAttribute('aria-label','Add key for '+label);
+      add.addEventListener('click',()=>{captureAction=action;$('key-capture-title').textContent='Now press the key for '+label.toLowerCase()+'.';$('key-capture-error').textContent='';capture.showModal();});keys.append(add);group.append(keys);
+      if(missing.includes(action)){const warning=document.createElement('span');warning.className='key-missing';warning.textContent='Add at least one key';group.append(warning);}
+      fragment.append(group);
+    }
+    $('key-groups').replaceChildren(fragment);$('match-start').disabled=!model||missing.length>0;
   }
-  function showBindings(){for(const action of Object.keys(bindings)){$('key-'+action).value=bindings[action].map(V.keyLabel).join(', ');previewBinding(action);}}
-  function readBindings(){return V.parseBindings(Object.fromEntries(Object.keys(V.defaultBindings).map(action=>[action,$('key-'+action).value])));}
+  function readBindings(){const result=K.normalize(bindings),missing=K.missing(result);if(missing.length)throw Error('Add a key for: '+missing.map(a=>K.actions[a]).join(', ')+'.');return result;}
   function loadPreferences(){
     try{
       const raw=document.cookie.split('; ').find(v=>v.startsWith(cookieName+'='));if(!raw)return;
       const p=JSON.parse(decodeURIComponent(raw.slice(cookieName.length+1)));
-      if(![2,3].includes(p.version))return;
+      if(![2,3,4].includes(p.version))return;
       if(p.version===2&&p.durationMs===180000)p.durationMs=120000;
-      const parsed=V.parseBindings(Object.fromEntries(Object.keys(V.defaultBindings).map(a=>[a,(p.bindings[a]||[]).join(',')])));
-      bindings=parsed;
-      for(const [id,key] of [['human-pace','gravityMs'],['fly-pace','flyMs'],['match-length','durationMs']]){
-        if([...$(id).options].some(o=>o.value===String(p[key])))$(id).value=String(p[key]);
+      bindings=K.normalize(p.bindings);
+      for(const [id,key] of [['human-pace','gravityMs'],['fly-pace','flyMs'],['fly-control-pace','flyControlMs'],['match-length','durationMs']]){
+        const input=$(id),value=p[key];if(!Number.isInteger(value)||value<50||value%50!==0)continue;
+        if(input.tagName==='SELECT'){if([...input.options].some(o=>Number(o.value)===value))input.value=value;}
+        else if(value<=Number(input.max))input.value=value;
       }
+      window.FlyScores.syncPreset();
     }catch{/* Invalid or unavailable cookies leave safe defaults. */}
   }
   function savePreferences(){
-    const data=encodeURIComponent(JSON.stringify({version:3,bindings,gravityMs:settings.gravityMs,flyMs:settings.flyMs,durationMs:settings.durationMs}));
+    const data=encodeURIComponent(JSON.stringify({version:4,bindings,...window.FlyScores.readSettings()}));
     try{document.cookie=`${cookieName}=${data}; Max-Age=31536000; Path=/; SameSite=Lax`;}catch{}
     const saved=document.cookie.split('; ').some(v=>v===cookieName+'='+data);
-    $('preferences-status').textContent=saved?'Controls and pace saved in this browser for one year.':'Cookie storage is unavailable here; settings will last for this open page.';
+    $('preferences-status').textContent=saved?'Controls saved in this browser for one year.':'Cookie storage is unavailable here; settings will last for this open page.';
   }
+  function stopCapture(){const action=captureAction;captureAction=null;capture.close();if(action)$('key-add-'+action).focus();}
+  $('key-capture-cancel').addEventListener('click',stopCapture);
+  capture.addEventListener('cancel',e=>e.preventDefault());
+  document.addEventListener('keydown',e=>{
+    if(!capture.open)return;e.preventDefault();e.stopImmediatePropagation();
+    if(e.repeat||e.isComposing)return;
+    if(e.ctrlKey||e.metaKey||e.altKey){$('key-capture-error').textContent='Press one key without Ctrl, Alt or Command.';return;}
+    try{bindings=K.assign(bindings,captureAction,e.code);showBindings();savePreferences();stopCapture();}catch(error){$('key-capture-error').textContent=error.message;}
+  },true);
   function controlHint(){
     const fragment=document.createDocumentFragment();
     for(const [action,label] of [['left','Left'],['right','Right'],['soft','Soft drop'],['rotate','Rotate clockwise'],['reverse','Rotate counterclockwise'],['hard','Hard drop'],['pause','Pause']]){
@@ -61,7 +85,7 @@
     running=false;paused=false;clearHeld();stopWorker();animation=null;move=null;showBindings();
     $('match-summary').hidden=true;$('match-setup').hidden=false;$('match-error').textContent='';$('match-pause').disabled=true;$('match-start').textContent='Start match →';
     $('match-status').textContent='CHOOSE YOUR PACE';$('seed-input').value=crypto.getRandomValues(new Uint32Array(1))[0];
-    $('match-start').disabled=!model;
+    $('match-start').disabled=!model||K.missing(bindings).length>0;
     if(!model)$('match-error').textContent='This report has no exported trained model. Regenerate it with its original checkpoint available.';
     $('match-clock').textContent=clock(Number($('match-length').value));$('human-pace').focus();
   }
@@ -124,20 +148,19 @@
   async function start(event){
     event.preventDefault();if(!model)return;
     try{bindings=readBindings();}catch(error){$('match-error').textContent=error.message;return;}
-    settings={seed:Number($('seed-input').value)>>>0,gravityMs:Number($('human-pace').value),flyMs:Number($('fly-pace').value),durationMs:Number($('match-length').value),rulesVersion:falling?FlyFallingLive.RANKED_RULES:1,bindings:structuredClone(bindings),humanRules:'falling gravity, 500ms lock delay, horizontal kicks',flyRules:falling?'falling-v1, 50ms controls, midair rotation and slides':'trained placement policy'};
-    settings.flyControlMs=FlyFallingLive.controlTickMs($('match-difficulty').value);
+    settings={seed:Number($('seed-input').value)>>>0,gravityMs:Number($('human-pace').value),flyMs:Number($('fly-pace').value),flyControlMs:Number($('fly-control-pace').value),durationMs:Number($('match-length').value),rulesVersion:falling?FlyFallingLive.RANKED_RULES:1,bindings:structuredClone(bindings),humanRules:'falling gravity, 500ms lock delay, horizontal kicks',flyRules:falling?'falling-v1, 50ms controls, midair rotation and slides':'trained placement policy'};
     const attempt=++startAttempt;$('match-start').disabled=true;$('match-start').textContent='Preparing match…';
     const registeredSession=await window.FlyScores.begin(settings,model);
     if(attempt!==startAttempt||!opened)return;scoreSession=registeredSession;
     $('match-start').disabled=false;$('match-start').textContent='Start match →';
     if(scoreSession){settings.seed=scoreSession.seed;settings.difficulty=scoreSession.difficulty;settings.ranked=true;settings.flyControlMs=scoreSession.settings.flyControlMs;}else{settings.ranked=false;}
-    if(falling)settings.flyRules=`falling-v1, ${settings.flyControlMs}ms controls, ${settings.flyControlMs===100?'half':'normal'} speed`;
+    if(falling)settings.flyRules=`falling-v1, ${settings.flyControlMs}ms controls, ${50/settings.flyControlMs}x speed`;
     savePreferences();$('keyboard-hint').replaceChildren(controlHint());
     const seq=new V.Sequence(settings.seed);human=new V.FallingPlayer(seq,shapes,settings.gravityMs);
     bot=falling?new FlyFallingLive.Controller(settings.seed,shapes,settings.flyMs):null;fly=falling?bot.player:new V.Player(seq,shapes);
     stopWorker();
     if(!scoreSession){try{
-      const code=($('versus-core')?.textContent||window.FLYTRIS_SOURCES?.['versus-core']||'')+(falling?'\n'+($('falling-policy')?.textContent||window.FLYTRIS_SOURCES?.['falling-policy']||'')+'\n'+($('falling-live')?.textContent||window.FLYTRIS_SOURCES?.['falling-live']||''):'')+`\nlet policy,shapes;onmessage=e=>{const d=e.data;try{if(d.type==='init'){policy=new FlyVersus.Policy(d.model);shapes=d.shapes;}else postMessage({id:d.id,frame:${falling?'FlyFallingLive.plan(d.snapshot,shapes,policy,d.remainingMs)':'policy.choose(FlyVersus.candidates(d.board,d.piece,shapes))'}});}catch(error){postMessage({id:d.id,error:String(error.message)});}};`;
+      const code='globalThis.FLYTRIS_CONFIG='+JSON.stringify(window.FLYTRIS_CONFIG)+';\n'+($('versus-core')?.textContent||window.FLYTRIS_SOURCES?.['versus-core']||'')+(falling?'\n'+($('falling-policy')?.textContent||window.FLYTRIS_SOURCES?.['falling-policy']||'')+'\n'+($('falling-live')?.textContent||window.FLYTRIS_SOURCES?.['falling-live']||''):'')+`\nlet policy,shapes;onmessage=e=>{const d=e.data;try{if(d.type==='init'){policy=new FlyVersus.Policy(d.model);shapes=d.shapes;}else postMessage({id:d.id,frame:${falling?'FlyFallingLive.plan(d.snapshot,shapes,policy,d.remainingMs)':'policy.choose(FlyVersus.candidates(d.board,d.piece,shapes))'}});}catch(error){postMessage({id:d.id,error:String(error.message)});}};`;
       const url=URL.createObjectURL(new Blob([code],{type:'text/javascript'}));worker=new Worker(url);URL.revokeObjectURL(url);
       worker.onmessage=e=>receive(e.data);worker.onerror=e=>{e.preventDefault();if(running)finish('error','The local model worker stopped. Please restart the match.');};
       worker.postMessage({type:'init',model,shapes});
@@ -173,7 +196,7 @@
     $('result-reason').textContent=error||({'time':'Time is up. Ranked by lines cleared, then pieces placed.','human-topout':'Your board topped out. The fly takes this round.','fly-topout':'The fly topped out. You take this round.'}[reason]);
     const rows=[['Lines cleared',human.lines,fly.lines],['Pieces placed',human.pieces,fly.pieces],['Single / double / triple / Tetris',human.clears.join(' / '),fly.clears.join(' / ')],['Lines per minute',(human.lines/Math.max(elapsed/60000,1/60)).toFixed(1),(fly.lines/Math.max(elapsed/60000,1/60)).toFixed(1)]];
     $('result-rows').replaceChildren(...rows.map(row=>{const tr=document.createElement('tr');row.forEach(value=>{const td=document.createElement('td');td.textContent=value;tr.appendChild(td);});return tr;}));
-    $('result-settings').textContent=falling?`Played ${clock(elapsed)} · seed ${settings.seed} · human / fly gravity ${settings.gravityMs} / ${settings.flyMs*settings.flyControlMs/50}ms. Shared sequence and falling rules; fly controls every ${settings.flyControlMs}ms (Medium runs at half speed). Ranked moves are verified in 10-second batches; practice pauses while the fly plans.`:`Played ${clock(elapsed)} · seed ${settings.seed} · legacy placement match.`;
+    $('result-settings').textContent=falling?`Played ${clock(elapsed)} · seed ${settings.seed} · human / fly gravity ${settings.gravityMs} / ${settings.flyMs*settings.flyControlMs/50}ms. Shared sequence and falling rules; fly controls every ${settings.flyControlMs}ms. Ranked moves are verified in 10-second batches; practice pauses while the fly plans.`:`Played ${clock(elapsed)} · seed ${settings.seed} · legacy placement match.`;
     window.FlyScores.complete(lastResult,scoreSession,()=>verifyProgress(true));
     animation=null;displayHuman();displayFly();$('match-summary').hidden=false;$('match-again').focus();
   }
@@ -187,8 +210,7 @@
     for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>touchSoft=false);
     b.addEventListener('click',e=>{if(e.detail===0)control('soft');});
   });
-  $('keys-reset').addEventListener('click',()=>{bindings=structuredClone(V.defaultBindings);showBindings();$('match-error').textContent='';});
-  for(const action of Object.keys(bindings))$('key-'+action).addEventListener('input',()=>previewBinding(action));
+  $('keys-reset').addEventListener('click',()=>{bindings=structuredClone(V.defaultBindings);showBindings();savePreferences();$('match-error').textContent='';});
   $('match-download').addEventListener('click',()=>{if(!lastResult)return;const url=URL.createObjectURL(new Blob([JSON.stringify(lastResult,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`flytris-match-${lastResult.settings.seed}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
   document.addEventListener('keydown',e=>{
     if(!opened)return;

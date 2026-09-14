@@ -11,7 +11,7 @@
     "dev": "node scripts/prepare-next.cjs && next dev --hostname 127.0.0.1 --port 8765",
     "db:migrate": "node scripts/migrate.cjs",
     "snapshot": "node scripts/snapshot.cjs",
-    "test:server": "node --test tests/test_scores.cjs tests/test_security.cjs tests/test_ranked.cjs tests/test_site_release.cjs && node --test tests/test_next_shell.cjs",
+    "test:server": "node --test tests/test_key_bindings.cjs tests/test_scores.cjs tests/test_security.cjs tests/test_ranked.cjs tests/test_site_release.cjs && node --test tests/test_next_shell.cjs",
     "start": "next start --hostname 127.0.0.1 --port 8765",
     "build:standalone": "node scripts/build.cjs",
     "pool:build": "node scripts/build-ranked-pool.cjs"

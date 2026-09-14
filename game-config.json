@@ -1,0 +1,9 @@
+{
+  "rulesVersion": 6,
+  "defaultDifficulty": "medium",
+  "presets": {
+    "easy": { "gravityMs": 800, "flyMs": 800, "flyControlMs": 300, "durationMs": 120000 },
+    "medium": { "gravityMs": 500, "flyMs": 500, "flyControlMs": 200, "durationMs": 120000 },
+    "hard": { "gravityMs": 250, "flyMs": 250, "flyControlMs": 100, "durationMs": 120000 }
+  }
+}

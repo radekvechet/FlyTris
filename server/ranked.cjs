@@ -1,5 +1,7 @@
-const crypto=require('node:crypto'),{makeService,PRESETS}=require('./scores.cjs'),verify=require('./verify.cjs');
-const L=require('../flytris/web/falling-live.js'),RULES=L.RANKED_RULES;
+const crypto=require('node:crypto'),{makeService}=require('./scores.cjs'),verify=require('./verify.cjs');
+const L=require('../flytris/web/falling-live.js'),RULES=L.RANKED_RULES,config=require('../game-config.json'),PRESETS=config.presets;
+const configHash=hashConfig();
+function hashConfig(){return crypto.createHash('sha256').update(JSON.stringify(config)).digest('hex');}
 const fail=(message,status=400)=>{throw Object.assign(Error(message),{status,expose:true});};
 const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 const safeKeys=(value,keys)=>{if(!value||Object.keys(value).some(k=>!keys.includes(k)))fail('Unexpected request fields.');};
@@ -21,7 +23,7 @@ function makeRankedService(db,modelHash,now=Date.now,pool=require('../site-data/
       safeKeys(input,['action','difficulty','modelHash','rulesVersion']);
       if(input.rulesVersion!==RULES||input.modelHash!==modelHash)fail('Match rules or model changed. Reload the game.',409);
       if(typeof input.difficulty!=='string'||!Object.hasOwn(PRESETS,input.difficulty))fail('Choose Easy, Medium or Hard.');
-      if(pool.modelId!==modelHash||pool.rulesVersion!==RULES)fail('Ranked fly pool is unavailable.',503);
+      if(pool.modelId!==modelHash||pool.rulesVersion!==RULES||pool.configHash!==configHash)fail('Ranked fly pool is unavailable.',503);
       const choices=pool.runs.filter(r=>r.difficulty===input.difficulty),run=choices[crypto.randomInt(choices.length)];
       const id=crypto.randomUUID(),token=crypto.randomBytes(32).toString('hex'),started=now();
       await db.query('INSERT INTO flytris_matches (id,token_hash,difficulty,model_hash,seed,started_at,rules_version) VALUES ($1,$2,$3,$4,$5,$6,$7)',[id,hash(token),input.difficulty,modelHash,run.seed,started,RULES]);
@@ -46,14 +48,19 @@ function makeRankedService(db,modelHash,now=Date.now,pool=require('../site-data/
       if(!state.reason||state.elapsedMs<1)fail('The server has not verified a completed match.');
       const human=verify.stats(state.human.state),fly=verify.stats(state.fly.state),r=input.result;
       if(r){
-        if(r.reason!==state.reason||r.elapsedSeconds!==state.elapsedMs/1000||r.settings?.seed!==Number(s.seed)||r.settings?.durationMs!==120000||r.settings?.rulesVersion!==RULES||r.settings?.flyControlMs!==L.controlTickMs(s.difficulty)||r.settings?.gravityMs!==PRESETS[s.difficulty].gravityMs||r.settings?.flyMs!==PRESETS[s.difficulty].flyMs||r.model?.model_sha256!==s.model_hash)fail('Result does not match the verified game.');
+        if(r.reason!==state.reason||r.elapsedSeconds!==state.elapsedMs/1000||r.settings?.seed!==Number(s.seed)||r.settings?.durationMs!==PRESETS[s.difficulty].durationMs||r.settings?.rulesVersion!==RULES||r.settings?.flyControlMs!==L.controlTickMs(s.difficulty)||r.settings?.gravityMs!==PRESETS[s.difficulty].gravityMs||r.settings?.flyMs!==PRESETS[s.difficulty].flyMs||r.model?.model_sha256!==s.model_hash)fail('Result does not match the verified game.');
         for(const side of ['human','fly'])for(const key of ['lines','pieces','clears','alive','board'])if(JSON.stringify(r[side]?.[key])!==JSON.stringify((side==='human'?human:fly)[key]))fail('Scores do not match the verified moves.');
       }
       const winner=state.reason==='human-topout'?'fly':state.reason==='fly-topout'?'human':human.lines!==fly.lines?(human.lines>fly.lines?'human':'fly'):human.pieces!==fly.pieces?(human.pieces>fly.pieces?'human':'fly'):'draw';
       await db.query('UPDATE flytris_matches SET completed_at=$1,elapsed_ms=$2,human_lines=$3,human_pieces=$4,fly_lines=$5,fly_pieces=$6,winner=$7,reason=$8 WHERE id=$9 AND completed_at IS NULL',[now(),state.elapsedMs,human.lines,human.pieces,fly.lines,fly.pieces,winner,state.reason,s.id]);
       const [saved]=await db.query('SELECT completed_at,player_name FROM flytris_matches WHERE id=$1',[s.id]);return {saved:true,id:s.id,timestamp:new Date(Number(saved.completed_at)).toISOString(),name:saved.player_name};
     },
-    async rename(input){safeKeys(input,['action','id','token','name']);if(input.name!==undefined&&typeof input.name!=='string')fail('Invalid player name.');await session(input);return base.rename(input);}
+    async rename(input){
+      safeKeys(input,['action','id','token','name']);if(input.name!==undefined&&typeof input.name!=='string')fail('Invalid player name.');
+      const s=await session(input),saved=await base.rename(input),cutoff=now()-86400000;
+      const [row]=await db.query(`SELECT COUNT(*) AS ahead FROM flytris_matches WHERE rules_version=$1 AND difficulty=$2 AND completed_at >= $3 AND (human_lines > $4 OR (human_lines=$4 AND human_pieces > $5) OR (human_lines=$4 AND human_pieces=$5 AND completed_at < $6) OR (human_lines=$4 AND human_pieces=$5 AND completed_at=$6 AND id < $7))`,[RULES,s.difficulty,cutoff,Number(s.human_lines),Number(s.human_pieces),Number(s.completed_at),s.id]);
+      return {...saved,rank:Number(row.ahead)+1,difficulty:s.difficulty,window:'24h'};
+    }
   };
 }
 module.exports={makeRankedService};

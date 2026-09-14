@@ -1,8 +1,28 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {localDatabase,migrate}=require('../server/db.cjs'),{makeRankedService}=require('../server/ranked.cjs'),verify=require('../server/verify.cjs');
 const pool=require('../site-data/ranked-pool.json'),model=require('../site-data/versus-model.json');
-async function fixture(difficulty='medium'){const db=localDatabase(':memory:');await migrate(db);let time=1000000;const service=makeRankedService(db,model.metadata.model_sha256,()=>time);const s=await service.start({difficulty,rulesVersion:5,modelHash:model.metadata.model_sha256});return {db,service,s,run:pool.runs.find(r=>r.id===s.flyRun.id),add:n=>time+=n};}
+async function fixture(difficulty='medium'){const db=localDatabase(':memory:');await migrate(db);let time=1000000;const service=makeRankedService(db,model.metadata.model_sha256,()=>time);const s=await service.start({difficulty,rulesVersion:6,modelHash:model.metadata.model_sha256});return {db,service,s,run:pool.runs.find(r=>r.id===s.flyRun.id),add:n=>time+=n};}
 const credentials=s=>({id:s.id,token:s.token});
+test('saving a name returns its full 24-hour rank with difficulty and tie-break isolation',async()=>{
+  const f=await fixture();try{
+    const {commands,state}=topout(f.run);f.add(state.elapsedMs);
+    await f.service.checkpoint({...credentials(f.s),sequence:1,commands});await f.service.finish(credentials(f.s));
+    const [target]=await f.db.query('SELECT * FROM flytris_matches WHERE id=$1',[f.s.id]);
+    async function rival(id,changes={}){
+      const r={...target,id,...changes};
+      await f.db.query('INSERT INTO flytris_matches (id,token_hash,difficulty,model_hash,seed,started_at,rules_version,completed_at,human_lines,human_pieces) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',[r.id,r.token_hash,r.difficulty,r.model_hash,r.seed,r.started_at,r.rules_version,r.completed_at,r.human_lines,r.human_pieces]);
+    }
+    for(let i=0;i<12;i++)await rival('higher-'+i,{human_lines:1});
+    await rival('000-tied-earlier-id');
+    await rival('zzz-tied-later-id');
+    await rival('older',{completed_at:Number(target.completed_at)-86400001,human_lines:100});
+    await rival('other-difficulty',{difficulty:'hard',human_lines:100});
+    await rival('retired',{rules_version:5,human_lines:100});
+    const result=await f.service.rename({...credentials(f.s),name:' Radek '});
+    assert.equal(result.name,'Radek');assert.equal(result.rank,14);assert.equal(result.difficulty,'medium');assert.equal(result.window,'24h');
+    assert.equal((await f.service.rename({...credentials(f.s),name:''})).name,'anonymous');
+  }finally{f.db.close();}
+});
 // Simulate whole ticks until the human stacks to the top; the last hard drop may end mid-tick.
 function topout(run){let state=verify.initial(run),commands='';for(let i=0;i<100;i++){
   try{const next=verify.advance(state,'BHT',run);state=next;commands+='BHT';}catch(e){if(!e.message.includes('Inputs continue'))throw e;state=verify.advance(state,'BH',run);commands+='BH';}
@@ -18,7 +38,7 @@ test('checkpoints compute both scores; invalid totals cannot be saved',async()=>
     assert.equal((await f.service.leaderboard('all')).summary.matches,0);
     const saved=await f.service.finish(credentials(f.s));assert.equal(saved.saved,true);
     await f.service.finish(credentials(f.s));assert.equal((await f.service.leaderboard('all')).summary.matches,1);
-    const [row]=await f.db.query('SELECT * FROM flytris_matches WHERE id=$1',[f.s.id]);assert.equal(row.fly_lines,receipt.fly.lines);assert.equal(row.human_pieces,receipt.human.pieces);assert.equal(row.elapsed_ms,state.elapsedMs);assert.equal(row.winner,'fly');assert.equal(row.rules_version,5);
+    const [row]=await f.db.query('SELECT * FROM flytris_matches WHERE id=$1',[f.s.id]);assert.equal(row.fly_lines,receipt.fly.lines);assert.equal(row.human_pieces,receipt.human.pieces);assert.equal(row.elapsed_ms,state.elapsedMs);assert.equal(row.winner,'fly');assert.equal(row.rules_version,6);
   }finally{f.db.close();}
 });
 test('retries are idempotent; altered past batches, future clocks and fabricated finishes fail',async()=>{
@@ -47,10 +67,10 @@ test('concurrent checkpoints accept one revision and preserve a deterministic st
  }finally{f.db.close();}
 });
 const actionCode={left:'L',right:'R',cw:'C',ccw:'A',hard:'H',soft:'',wait:''};
-test('Medium halves fly simulation speed while human time and verification stay in sync',()=>{
+test('configured fly cadence keeps human time and browser/server verification in sync',()=>{
   const L=require('../flytris/web/falling-live.js'),shapes=require('../site-data/shapes.json');
   for(const difficulty of ['easy','medium','hard']){
-    const run=pool.runs.find(r=>r.difficulty===difficulty),bot=new L.Controller(run.seed,shapes,run.gravityMs);
+    const run=pool.runs.find(r=>r.difficulty===difficulty),bot=new L.Controller(run.seed,shapes,run.flyMs);
     let state=verify.initial(run),steps=0;
     for(let elapsed=50;elapsed<=10000;elapsed+=50){
       const index=L.actionIndex(elapsed,L.controlTickMs(difficulty));
@@ -63,13 +83,13 @@ test('Medium halves fly simulation speed while human time and verification stay 
         assert.equal(state.human.state.fallTime,50);
       }
     }
-    assert.equal(steps,difficulty==='medium'?100:200);
-    assert.equal(bot.time,difficulty==='medium'?5000:10000);
+    assert.equal(steps,Math.floor(10000/L.controlTickMs(difficulty)));
+    assert.equal(bot.time,Math.floor(10000/L.controlTickMs(difficulty))*50);
   }
 });
 test('ranked cadence comes from the server and retired rules cannot start or enter rankings',async()=>{
   const f=await fixture();try{
-    assert.equal(f.s.settings.flyControlMs,100);
+    assert.equal(f.s.settings.flyControlMs,200);
     await assert.rejects(f.service.start({difficulty:'medium',rulesVersion:4,modelHash:model.metadata.model_sha256}),{status:409});
     const {commands,state}=topout(f.run);f.add(state.elapsedMs);
     await f.service.checkpoint({...credentials(f.s),sequence:1,commands});
@@ -78,26 +98,12 @@ test('ranked cadence comes from the server and retired rules cannot start or ent
     assert.equal((await f.service.leaderboard('all')).summary.matches,0);
   }finally{f.db.close();}
 });
-test('a full two-minute game is scored from twelve verified checkpoints',async()=>{
-  const f=await fixture('easy');try{
-    let last;
-    for(let offset=0;offset<2400;offset+=200){
-      const commands=f.run.actions.slice(offset,offset+200).map(a=>actionCode[a]+'B'+(a==='soft'?'S':'T')).join('');
-      f.add(10000);last=await f.service.checkpoint({...credentials(f.s),sequence:offset/200+1,commands});
-    }
-    assert.equal(last.elapsedMs,120000);assert.equal(last.reason,'time');assert.deepEqual(last.human,last.fly);
-    const result={settings:{...f.s.settings,seed:f.s.seed},model:{model_sha256:model.metadata.model_sha256},reason:last.reason,elapsedSeconds:120,human:last.human,fly:last.fly};
-    await f.service.finish({...credentials(f.s),result});
-    const [row]=await f.db.query('SELECT winner,elapsed_ms,human_lines,fly_lines FROM flytris_matches WHERE id=$1',[f.s.id]);
-    assert.equal(row.winner,'draw');assert.equal(row.elapsed_ms,120000);assert.equal(row.fly_lines,f.run.lines);
-  }finally{f.db.close();}
-});
 test('every committed fly run reproduces its published score at its assigned pace',()=>{
   const L=require('../flytris/web/falling-live.js'),shapes=require('../site-data/shapes.json');
   for(const run of pool.runs){
-    const bot=new L.Controller(run.seed,shapes,run.gravityMs);
+    const bot=new L.Controller(run.seed,shapes,run.flyMs);
     assert.equal(run.controlTickMs,L.controlTickMs(run.difficulty));
-    assert.equal(run.actions.length,120000/run.controlTickMs);
+    assert.equal(run.actions.length,run.durationMs/run.controlTickMs);
     for(let elapsed=50;elapsed<=120000;elapsed+=50){
       const index=L.actionIndex(elapsed,run.controlTickMs);
       if(index!==null)bot.step(run.actions[index]);
@@ -121,6 +127,6 @@ test('a full Medium game saves the slower fly score after all twelve checkpoints
     assert.equal(receipt.human.lines,human.lines);
     await f.service.finish({...credentials(f.s),result:{settings:{...f.s.settings,seed:f.s.seed},model:{model_sha256:model.metadata.model_sha256},reason:'time',elapsedSeconds:120,human:receipt.human,fly:receipt.fly}});
     const [row]=await f.db.query('SELECT fly_lines,rules_version FROM flytris_matches WHERE id=$1',[f.s.id]);
-    assert.equal(row.fly_lines,f.run.lines);assert.equal(row.rules_version,5);
+    assert.equal(row.fly_lines,f.run.lines);assert.equal(row.rules_version,6);
   }finally{f.db.close();}
 });

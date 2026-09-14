@@ -45,9 +45,10 @@ by Git. `npm run start` serves a production build; production mode requires Neon
 
 Ranked presets last **two minutes** at 800/500/250 ms gravity for Easy/Medium/Hard.
 The human and verification clock use 50 ms simulation steps. The fly advances
-one trained 50 ms step every 100 ms on Medium (half speed), or every 50 ms on
-Easy and Hard. Medium therefore has 1,000 ms effective fly gravity and a
-1-second fly landing delay; human gravity remains 500 ms.
+one trained step every 300/200/100 ms for Easy/Medium/Hard. Its falling and landing
+timing scale with that interval. Defaults live in `game-config.json`; dev and
+production builds regenerate stale ranked recordings. Increment `rulesVersion`
+when changing defaults. Only exact presets qualify for the scoreboard.
 
 1. `start` assigns an opaque match ID, private token, preset, server timestamp and
    a fly run from the committed pool. A new row deliberately has `completed_at`
@@ -62,10 +63,12 @@ Easy and Hard. Medium therefore has 1,000 ms effective fly gravity and a
    must agree with verification. Invalid input returns a truthful 400 response;
    token, sequencing and rate failures use 403, 409 and 429 as appropriate.
 4. Both scores initially use `anonymous`. A valid match token can set a name of
-   up to 60 characters for one hour after completion. Names are plain text.
+   up to 60 characters for one hour after completion. Names are plain text. Saving
+   returns the server-calculated position in the last-24-hours scoreboard for that
+   difficulty; the UI replaces the name form with a congratulations message.
 
-Only `rules_version=5` (checkpoint-verified matches with half-speed Medium) enters current leaderboards.
-Earlier rows, including version 4 matches and unfinished sessions, remain intact
+Only `rules_version=6` (checkpoint-verified matches under the current configured defaults) enters current leaderboards.
+Earlier rows, including version 4 and 5 matches and unfinished sessions, remain intact
 but do not enter the current leaderboard. No database migration is required.
 Ranking uses lines, pieces, then earlier completion time. Rolling 24-hour, 7-day,
 30-day and overall windows use server completion timestamps. Chart totals include
@@ -78,13 +81,13 @@ The trained checkpoint is unchanged. Ranked mode selects from nine offline fly
 runs: three seeds at each difficulty. Practice uses fresh browser inference.
 Generate a new pool with `npm run pool:build` after updating the model, review it,
 and commit `site-data/ranked-pool.json`. This is an explicit offline operation,
-not work repeated during builds or on every visitor's request. A pool/model
+also run automatically during a build if the configuration or model changed. It
+is never run for a visitor request. A pool/model
 change invalidates old in-progress ranked sessions; the server rejects mismatches.
 
 Training/evaluation snapshots still use `evaluate-falling.cjs` and
 `integrate-falling.cjs`. Historical three-minute measurements remain accurate and
-separate from current match duration. The physics and trained weights are unchanged; Medium plays the fly simulation
-at half speed.
+separate from current match duration. The physics and trained weights are unchanged; all presets slow the fly simulation according to their configured control tick.
 
 See [SECURITY.md](SECURITY.md) for anti-cheat limits, abuse protection and the
 Vercel firewall rule that still needs dashboard configuration.

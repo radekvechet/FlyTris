@@ -1,5 +1,5 @@
 const crypto=require('node:crypto');
-const PRESETS={easy:{gravityMs:800,flyMs:800,durationMs:120000,rulesVersion:3},medium:{gravityMs:500,flyMs:500,durationMs:120000,rulesVersion:3},hard:{gravityMs:250,flyMs:250,durationMs:120000,rulesVersion:3}};
+const PRESETS=Object.fromEntries(Object.entries(require('../game-config.json').presets).map(([key,p])=>[key,{...p,rulesVersion:3}]));
 const WINDOWS={'24h':86400000,'7d':7*86400000,'30d':30*86400000,all:null};
 const fail=(message,status=400)=>{throw Object.assign(new Error(message),{status,expose:true});};
 const hash=s=>crypto.createHash('sha256').update(s).digest('hex');

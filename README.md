@@ -33,19 +33,20 @@ GPU, full connectome download or new training. Local scores use SQLite in
   soft drop and a 500 ms landing delay.
 - Default controls: A/D or arrows to move; S/Down to soft-drop; W/Up/E/X/Space/Enter
   to rotate clockwise; Q/Z counterclockwise; Shift to hard-drop; P/Escape to pause.
-  Edit bindings before a match; preferences are saved in a browser cookie.
+  Add keys by pressing them in the capture popup, or click keycaps to remove them.
+  Keys move automatically from their previous function. Every function needs a key;
+  edits save immediately in a browser cookie, including incomplete sets.
 - Easy, Medium and Hard ranked matches last two minutes. Leaderboards show
   human and fly scores over 24 hours, seven days, 30 days and all time.
 
 **Current opponent:** the site uses the saved falling-rules checkpoint after 63
 generations. It moves and rotates through the same falling engine as the human,
-with a control every 100 ms on Medium and 50 ms on Easy and Hard. Medium slows
-the whole fly simulation to half speed, including gravity and landing delay;
-human timing stays unchanged. Ranked games use one of nine precomputed fly runs
-and server verification every ten seconds; the server calculates both scores.
-Practice runs fresh inference in a browser worker. Easy and Hard use equal
-gravity for both sides. Current leaderboards use rules version 5; older scores
-are preserved separately.
+with a control every 300 ms on Easy, 200 ms on Medium and 100 ms on Hard.
+The whole fly simulation slows with its control tick, including gravity and
+landing delay; human timing stays unchanged. Ranked games use one of nine
+precomputed fly runs and server verification every ten seconds; the server
+calculates both scores. Practice runs fresh inference in a browser worker.
+Current leaderboards use rules version 6; older scores are preserved separately.
 See [SECURITY.md](SECURITY.md) for the limits of anti-cheat verification.
 
 The planned six-hour training run stopped at 3.19 hours on a Windows file lock.
@@ -138,12 +139,40 @@ Optional Neon agent skills can be installed with
 not authenticate the CLI or grant database access. They are not needed to run
 the app or deploy with a server-side `DATABASE_URL`.
 
+## Difficulty configuration
+
+Edit [`game-config.json`](game-config.json) to change the default difficulty,
+ranked presets and rules version. Browser settings, server verification and
+recording generation all read this file.
+
+| Setting | Meaning |
+|---|---|
+| `gravityMs` | Human milliseconds per falling row |
+| `flyMs` | Fly gravity in the original simulation |
+| `flyControlMs` | Real milliseconds per trained 50 ms fly step |
+| `durationMs` | Ranked match duration in milliseconds |
+
+Use positive multiples of 50 ms. Gravity is limited to 5,000 ms, fly control
+intervals to 1,000 ms, and ranked duration to 120,000 ms; duration must be divisible
+by the fly control interval. Effective fly gravity is `flyMs * flyControlMs / 50`.
+Increase `rulesVersion` when changing defaults so earlier scores remain separate.
+`npm run dev` and `npm run build` regenerate stale ranked recordings automatically;
+commit the updated `site-data/ranked-pool.json` with your configuration. No new
+training or database schema migration is needed for these timing changes.
+
+Only exact default settings qualify for ranking. Custom settings are practice.
+After saving a name, the name form disappears and shows the match's position
+in that difficulty's last-24-hours scoreboard, including positions below the top
+ten. The server orders by lines, pieces, completion time and match ID. Position
+is calculated when the name is saved and may change as other people play.
+
 ## Repository layout
 
 | Path | Purpose |
 |---|---|
 | `flytris/` | Python training, graph extraction, benchmarks and reports |
 | `flytris/web/` | Browser game, procedural animation and falling physics/controller |
+| `game-config.json` | Shared difficulty defaults and ranked rules version |
 | `app/` | Next.js server-rendered pages, metadata and score API route |
 | `scripts/` | Site builds, training workers and orchestration |
 | `server/`, `db/` | Ranked verification, storage adapters and database schema |
