@@ -42,7 +42,7 @@
   document.addEventListener('visibilitychange',()=>{if(document.hidden){timeline.pause();scene?.invalidate();draw();}});
   let last=performance.now();
   function animate(now){
-    const dt=Math.min(50,now-last);last=now;
+    const dt=Math.max(0,Math.min(50,now-last));last=now;
     if(!document.hidden){
       if(timeline.playing){timeline.advance(dt*Number(speed.value));draw(dt*Number(speed.value));}
       else scene?.renderIfNeeded();

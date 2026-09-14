@@ -7,7 +7,7 @@
     const data=await response.json();if(!response.ok)throw Error(data.error||'Could not save scores.');return data;
   }
   const level=s=>Object.keys(presets).find(key=>Object.entries(presets[key]).every(([k,v])=>s[k]===v))||'custom';
-  function syncPreset(){const s={gravityMs:Number($('human-pace').value),flyMs:Number($('fly-pace').value),durationMs:Number($('match-length').value)};$('match-difficulty').value=level(s);$('seed-input').disabled=level(s)!=='custom';$('ranking-note').textContent=level(s)==='custom'?'Custom practice · excluded from high scores.':'Ranked preset · the server selects a verified fly run; both scores are recorded.';}
+  function syncPreset(){const s={gravityMs:Number($('human-pace').value),flyMs:Number($('fly-pace').value),durationMs:Number($('match-length').value)};$('match-difficulty').value=level(s);$('seed-input').disabled=level(s)!=='custom';$('ranking-note').textContent=level(s)==='custom'?'Custom practice · excluded from high scores.':'Ranked preset · '+(level(s)==='medium'?'fly at half speed (100 ms controls, 1,000 ms gravity). ':'fly controls every 50 ms. ')+'Both scores are recorded.';}
   $('match-difficulty').addEventListener('change',()=>{const p=presets[$('match-difficulty').value];if(p){$('human-pace').value=p.gravityMs;$('fly-pace').value=p.flyMs;$('match-length').value=p.durationMs;}else{$('seed-input').disabled=false;$('ranking-note').textContent='Choose your pace below. Only exact two-minute presets enter high scores.';return;}syncPreset();});
   for(const id of ['human-pace','fly-pace','match-length'])$(id).addEventListener('change',syncPreset);
   function format(n){return Number(n).toLocaleString();}

@@ -1,15 +1,16 @@
 const crypto=require('node:crypto'),{makeService,PRESETS}=require('./scores.cjs'),verify=require('./verify.cjs');
+const L=require('../flytris/web/falling-live.js'),RULES=L.RANKED_RULES;
 const fail=(message,status=400)=>{throw Object.assign(Error(message),{status,expose:true});};
 const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 const safeKeys=(value,keys)=>{if(!value||Object.keys(value).some(k=>!keys.includes(k)))fail('Unexpected request fields.');};
 function makeRankedService(db,modelHash,now=Date.now,pool=require('../site-data/ranked-pool.json')){
-  const base=makeService(db,modelHash,now,4);
+  const base=makeService(db,modelHash,now,RULES);
   async function session(input){
     if(typeof input.id!=='string'||!/^[0-9a-f-]{36}$/i.test(input.id)||typeof input.token!=='string'||!/^[0-9a-f]{64}$/i.test(input.token))fail('Invalid match token.',403);
     const [s]=await db.query(`SELECT m.*,c.run_id,c.pool_id,c.sequence,c.state_json,c.last_batch_hash,c.accepted_at,c.elapsed_ms AS verified_ms
       FROM flytris_matches m JOIN flytris_checkpoints c ON c.match_id=m.id WHERE m.id=$1 AND m.token_hash=$2`,[input.id,hash(input.token)]);
     if(!s)fail('Match not found.',403);
-    if(Number(s.rules_version)!==4||(s.completed_at===null&&(s.pool_id!==pool.poolId||s.model_hash!==modelHash)))fail('Match rules or model changed. Start a new match.',409);
+    if(Number(s.rules_version)!==RULES||(s.completed_at===null&&(s.pool_id!==pool.poolId||s.model_hash!==modelHash)))fail('Match rules or model changed. Start a new match.',409);
     if(now()-Number(s.started_at)>7200000)fail('This match has expired.');
     return s;
   }
@@ -18,14 +19,14 @@ function makeRankedService(db,modelHash,now=Date.now,pool=require('../site-data/
     leaderboard:base.leaderboard,
     async start(input){
       safeKeys(input,['action','difficulty','modelHash','rulesVersion']);
-      if(input.rulesVersion!==4||input.modelHash!==modelHash)fail('Match rules or model changed. Reload the game.',409);
+      if(input.rulesVersion!==RULES||input.modelHash!==modelHash)fail('Match rules or model changed. Reload the game.',409);
       if(typeof input.difficulty!=='string'||!Object.hasOwn(PRESETS,input.difficulty))fail('Choose Easy, Medium or Hard.');
-      if(pool.modelId!==modelHash)fail('Ranked fly pool is unavailable.',503);
+      if(pool.modelId!==modelHash||pool.rulesVersion!==RULES)fail('Ranked fly pool is unavailable.',503);
       const choices=pool.runs.filter(r=>r.difficulty===input.difficulty),run=choices[crypto.randomInt(choices.length)];
       const id=crypto.randomUUID(),token=crypto.randomBytes(32).toString('hex'),started=now();
-      await db.query('INSERT INTO flytris_matches (id,token_hash,difficulty,model_hash,seed,started_at,rules_version) VALUES ($1,$2,$3,$4,$5,$6,4)',[id,hash(token),input.difficulty,modelHash,run.seed,started]);
+      await db.query('INSERT INTO flytris_matches (id,token_hash,difficulty,model_hash,seed,started_at,rules_version) VALUES ($1,$2,$3,$4,$5,$6,$7)',[id,hash(token),input.difficulty,modelHash,run.seed,started,RULES]);
       await db.query('INSERT INTO flytris_checkpoints (match_id,run_id,pool_id,state_json,accepted_at) VALUES ($1,$2,$3,$4,$5)',[id,run.id,pool.poolId,JSON.stringify(verify.initial(run)),started]);
-      return {id,token,seed:run.seed,difficulty:input.difficulty,settings:{...PRESETS[input.difficulty],rulesVersion:4},startedAt:new Date(started).toISOString(),checkpointMs:10000,flyRun:{id:run.id,actions:run.actions}};
+      return {id,token,seed:run.seed,difficulty:input.difficulty,settings:{...PRESETS[input.difficulty],rulesVersion:RULES,flyControlMs:L.controlTickMs(input.difficulty)},startedAt:new Date(started).toISOString(),checkpointMs:10000,flyRun:{id:run.id,actions:run.actions}};
     },
     async checkpoint(input){
       safeKeys(input,['action','id','token','sequence','commands']);
@@ -45,7 +46,7 @@ function makeRankedService(db,modelHash,now=Date.now,pool=require('../site-data/
       if(!state.reason||state.elapsedMs<1)fail('The server has not verified a completed match.');
       const human=verify.stats(state.human.state),fly=verify.stats(state.fly.state),r=input.result;
       if(r){
-        if(r.reason!==state.reason||r.elapsedSeconds!==state.elapsedMs/1000||r.settings?.seed!==Number(s.seed)||r.settings?.durationMs!==120000||r.settings?.rulesVersion!==4||r.settings?.gravityMs!==PRESETS[s.difficulty].gravityMs||r.settings?.flyMs!==PRESETS[s.difficulty].flyMs||r.model?.model_sha256!==s.model_hash)fail('Result does not match the verified game.');
+        if(r.reason!==state.reason||r.elapsedSeconds!==state.elapsedMs/1000||r.settings?.seed!==Number(s.seed)||r.settings?.durationMs!==120000||r.settings?.rulesVersion!==RULES||r.settings?.flyControlMs!==L.controlTickMs(s.difficulty)||r.settings?.gravityMs!==PRESETS[s.difficulty].gravityMs||r.settings?.flyMs!==PRESETS[s.difficulty].flyMs||r.model?.model_sha256!==s.model_hash)fail('Result does not match the verified game.');
         for(const side of ['human','fly'])for(const key of ['lines','pieces','clears','alive','board'])if(JSON.stringify(r[side]?.[key])!==JSON.stringify((side==='human'?human:fly)[key]))fail('Scores do not match the verified moves.');
       }
       const winner=state.reason==='human-topout'?'fly':state.reason==='fly-topout'?'human':human.lines!==fly.lines?(human.lines>fly.lines?'human':'fly'):human.pieces!==fly.pieces?(human.pieces>fly.pieces?'human':'fly'):'draw';

@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {localDatabase,migrate}=require('../server/db.cjs'),{makeRankedService}=require('../server/ranked.cjs'),verify=require('../server/verify.cjs');
 const pool=require('../site-data/ranked-pool.json'),model=require('../site-data/versus-model.json');
-async function fixture(){const db=localDatabase(':memory:');await migrate(db);let time=1000000;const service=makeRankedService(db,model.metadata.model_sha256,()=>time);const s=await service.start({difficulty:'medium',rulesVersion:4,modelHash:model.metadata.model_sha256});return {db,service,s,run:pool.runs.find(r=>r.id===s.flyRun.id),add:n=>time+=n};}
+async function fixture(difficulty='medium'){const db=localDatabase(':memory:');await migrate(db);let time=1000000;const service=makeRankedService(db,model.metadata.model_sha256,()=>time);const s=await service.start({difficulty,rulesVersion:5,modelHash:model.metadata.model_sha256});return {db,service,s,run:pool.runs.find(r=>r.id===s.flyRun.id),add:n=>time+=n};}
 const credentials=s=>({id:s.id,token:s.token});
 // Simulate whole ticks until the human stacks to the top; the last hard drop may end mid-tick.
 function topout(run){let state=verify.initial(run),commands='';for(let i=0;i<100;i++){
@@ -18,7 +18,7 @@ test('checkpoints compute both scores; invalid totals cannot be saved',async()=>
     assert.equal((await f.service.leaderboard('all')).summary.matches,0);
     const saved=await f.service.finish(credentials(f.s));assert.equal(saved.saved,true);
     await f.service.finish(credentials(f.s));assert.equal((await f.service.leaderboard('all')).summary.matches,1);
-    const [row]=await f.db.query('SELECT * FROM flytris_matches WHERE id=$1',[f.s.id]);assert.equal(row.fly_lines,receipt.fly.lines);assert.equal(row.human_pieces,receipt.human.pieces);assert.equal(row.elapsed_ms,state.elapsedMs);assert.equal(row.winner,'fly');assert.equal(row.rules_version,4);
+    const [row]=await f.db.query('SELECT * FROM flytris_matches WHERE id=$1',[f.s.id]);assert.equal(row.fly_lines,receipt.fly.lines);assert.equal(row.human_pieces,receipt.human.pieces);assert.equal(row.elapsed_ms,state.elapsedMs);assert.equal(row.winner,'fly');assert.equal(row.rules_version,5);
   }finally{f.db.close();}
 });
 test('retries are idempotent; altered past batches, future clocks and fabricated finishes fail',async()=>{
@@ -47,8 +47,39 @@ test('concurrent checkpoints accept one revision and preserve a deterministic st
  }finally{f.db.close();}
 });
 const actionCode={left:'L',right:'R',cw:'C',ccw:'A',hard:'H',soft:'',wait:''};
-test('a full two-minute game is scored from twelve verified checkpoints',async()=>{
+test('Medium halves fly simulation speed while human time and verification stay in sync',()=>{
+  const L=require('../flytris/web/falling-live.js'),shapes=require('../site-data/shapes.json');
+  for(const difficulty of ['easy','medium','hard']){
+    const run=pool.runs.find(r=>r.difficulty===difficulty),bot=new L.Controller(run.seed,shapes,run.gravityMs);
+    let state=verify.initial(run),steps=0;
+    for(let elapsed=50;elapsed<=10000;elapsed+=50){
+      const index=L.actionIndex(elapsed,L.controlTickMs(difficulty));
+      if(index!==null){bot.step(run.actions[index]);steps++;}
+      state=verify.advance(state,'BT',run);
+      assert.deepEqual(state.fly,L.snapshot(bot.player,run.seed));
+      assert.equal(state.elapsedMs,elapsed);
+      if(elapsed===50&&difficulty==='medium'){
+        assert.equal(state.fly.state.fallTime,0);
+        assert.equal(state.human.state.fallTime,50);
+      }
+    }
+    assert.equal(steps,difficulty==='medium'?100:200);
+    assert.equal(bot.time,difficulty==='medium'?5000:10000);
+  }
+});
+test('ranked cadence comes from the server and retired rules cannot start or enter rankings',async()=>{
   const f=await fixture();try{
+    assert.equal(f.s.settings.flyControlMs,100);
+    await assert.rejects(f.service.start({difficulty:'medium',rulesVersion:4,modelHash:model.metadata.model_sha256}),{status:409});
+    const {commands,state}=topout(f.run);f.add(state.elapsedMs);
+    await f.service.checkpoint({...credentials(f.s),sequence:1,commands});
+    await f.service.finish(credentials(f.s));
+    await f.db.query('UPDATE flytris_matches SET rules_version=4 WHERE id=$1',[f.s.id]);
+    assert.equal((await f.service.leaderboard('all')).summary.matches,0);
+  }finally{f.db.close();}
+});
+test('a full two-minute game is scored from twelve verified checkpoints',async()=>{
+  const f=await fixture('easy');try{
     let last;
     for(let offset=0;offset<2400;offset+=200){
       const commands=f.run.actions.slice(offset,offset+200).map(a=>actionCode[a]+'B'+(a==='soft'?'S':'T')).join('');
@@ -61,9 +92,35 @@ test('a full two-minute game is scored from twelve verified checkpoints',async()
     assert.equal(row.winner,'draw');assert.equal(row.elapsed_ms,120000);assert.equal(row.fly_lines,f.run.lines);
   }finally{f.db.close();}
 });
-test('every committed fly run reproduces its published score',()=>{
-  for(const run of pool.runs){let state=verify.initial(run);
-    for(let offset=0;offset<2400;offset+=200){const commands=run.actions.slice(offset,offset+200).map(a=>actionCode[a]+'B'+(a==='soft'?'S':'T')).join('');state=verify.advance(state,commands,run);}
-    assert.equal(state.fly.state.lines,run.lines);assert.equal(state.fly.state.pieces,run.pieces);assert.equal(state.reason,'time');
+test('every committed fly run reproduces its published score at its assigned pace',()=>{
+  const L=require('../flytris/web/falling-live.js'),shapes=require('../site-data/shapes.json');
+  for(const run of pool.runs){
+    const bot=new L.Controller(run.seed,shapes,run.gravityMs);
+    assert.equal(run.controlTickMs,L.controlTickMs(run.difficulty));
+    assert.equal(run.actions.length,120000/run.controlTickMs);
+    for(let elapsed=50;elapsed<=120000;elapsed+=50){
+      const index=L.actionIndex(elapsed,run.controlTickMs);
+      if(index!==null)bot.step(run.actions[index]);
+    }
+    assert.equal(bot.player.lines,run.lines);assert.equal(bot.player.pieces,run.pieces);
   }
+});
+test('a full Medium game saves the slower fly score after all twelve checkpoints',async()=>{
+  const f=await fixture();try{
+    const F=require('../flytris/web/falling-policy.cjs'),shapes=require('../site-data/shapes.json');
+    // Independent legal human input at normal speed keeps both boards alive for two minutes.
+    const human=F.play(model,shapes,model.weights,f.run.seed,500,{durationMs:120000,record:true});
+    const actions=human.trace.flatMap(t=>t.actions);while(actions.length<2400)actions.push('wait');
+    let receipt;
+    for(let offset=0;offset<2400;offset+=200){
+      const commands=actions.slice(offset,offset+200).map(a=>actionCode[a]+'B'+(a==='soft'?'S':'T')).join('');
+      f.add(10000);receipt=await f.service.checkpoint({...credentials(f.s),sequence:offset/200+1,commands});
+    }
+    assert.equal(receipt.reason,'time');assert.equal(receipt.elapsedMs,120000);
+    assert.equal(receipt.fly.lines,f.run.lines);assert.equal(receipt.fly.pieces,f.run.pieces);
+    assert.equal(receipt.human.lines,human.lines);
+    await f.service.finish({...credentials(f.s),result:{settings:{...f.s.settings,seed:f.s.seed},model:{model_sha256:model.metadata.model_sha256},reason:'time',elapsedSeconds:120,human:receipt.human,fly:receipt.fly}});
+    const [row]=await f.db.query('SELECT fly_lines,rules_version FROM flytris_matches WHERE id=$1',[f.s.id]);
+    assert.equal(row.fly_lines,f.run.lines);assert.equal(row.rules_version,5);
+  }finally{f.db.close();}
 });

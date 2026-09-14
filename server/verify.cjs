@@ -10,8 +10,9 @@ function advance(saved,commands,run){
     if(state.reason)fail('Inputs continue after the game ended.');
     if(command==='B'){
       if(state.gravityDue||state.elapsedMs>=120000)fail('Invalid game clock.');
-      const action=run.actions[state.elapsedMs/50];if(!action)fail('The fly recording is incomplete.');
-      F.act(fly,action);state.elapsedMs+=50;state.gravityDue=true;
+      const index=L.actionIndex(state.elapsedMs+50,L.controlTickMs(run.difficulty));
+      if(index!==null){const action=run.actions[index];if(!action)fail('The fly recording is incomplete.');F.act(fly,action);}
+      state.elapsedMs+=50;state.gravityDue=true;
       if(state.elapsedMs-before>10000)fail('Checkpoint exceeds ten seconds.');
     }else if(command==='T'||command==='S'){
       if(!state.gravityDue)fail('Gravity tick is out of order.');

@@ -44,7 +44,10 @@ by Git. `npm run start` serves a production build; production mode requires Neon
 ## Ranked match lifecycle
 
 Ranked presets last **two minutes** at 800/500/250 ms gravity for Easy/Medium/Hard.
-Controls use 50 ms simulation steps, with the same falling physics as training.
+The human and verification clock use 50 ms simulation steps. The fly advances
+one trained 50 ms step every 100 ms on Medium (half speed), or every 50 ms on
+Easy and Hard. Medium therefore has 1,000 ms effective fly gravity and a
+1-second fly landing delay; human gravity remains 500 ms.
 
 1. `start` assigns an opaque match ID, private token, preset, server timestamp and
    a fly run from the committed pool. A new row deliberately has `completed_at`
@@ -61,8 +64,9 @@ Controls use 50 ms simulation steps, with the same falling physics as training.
 4. Both scores initially use `anonymous`. A valid match token can set a name of
    up to 60 characters for one hour after completion. Names are plain text.
 
-Only `rules_version=4` (checkpoint-verified matches) enters current leaderboards.
-Earlier rows, including valid older matches and unfinished sessions, remain intact.
+Only `rules_version=5` (checkpoint-verified matches with half-speed Medium) enters current leaderboards.
+Earlier rows, including version 4 matches and unfinished sessions, remain intact
+but do not enter the current leaderboard. No database migration is required.
 Ranking uses lines, pieces, then earlier completion time. Rolling 24-hour, 7-day,
 30-day and overall windows use server completion timestamps. Chart totals include
 all matching verified matches; the three difficulty lists show ten human scores,
@@ -79,8 +83,8 @@ change invalidates old in-progress ranked sessions; the server rejects mismatche
 
 Training/evaluation snapshots still use `evaluate-falling.cjs` and
 `integrate-falling.cjs`. Historical three-minute measurements remain accurate and
-separate from current match duration. The physics and trained weights are not
-changed by this web migration.
+separate from current match duration. The physics and trained weights are unchanged; Medium plays the fly simulation
+at half speed.
 
 See [SECURITY.md](SECURITY.md) for anti-cheat limits, abuse protection and the
 Vercel firewall rule that still needs dashboard configuration.
