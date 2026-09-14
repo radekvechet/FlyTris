@@ -1,7 +1,7 @@
 # FlyTris
 
 A playable Tetris experiment with a fly-derived spiking circuit, a Three.js fly
-at the controls, human-versus-fly matches, and reproducible local training.
+at the controls, human-versus-fly matches, a Next.js server-rendered site, and reproducible local training.
 
 The default model contains **256 neurons, 9,089 directed connections and eight
 trainable output weights**. Connectivity comes from FlyWire v783. The circuit
@@ -39,8 +39,11 @@ GPU, full connectome download or new training. Local scores use SQLite in
 
 **Current opponent:** the site uses the saved falling-rules checkpoint after 63
 generations. It moves and rotates through the same falling engine as the human,
-with a control every 50 ms; both clocks pause while its worker plans. Ranked
-presets use equal gravity for both sides.
+with a control every 50 ms. Ranked games use one of nine precomputed fly runs
+and server verification every ten seconds; the server calculates both scores.
+Practice runs fresh inference in a browser worker. Ranked presets use equal
+gravity for both sides. Older unverified scores are preserved separately.
+See [SECURITY.md](SECURITY.md) for the limits of anti-cheat verification.
 
 The planned six-hour training run stopped at 3.19 hours on a Windows file lock.
 A separate fresh evaluation measured **190.8 → 280.1 lines/game** over 24 paired

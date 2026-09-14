@@ -2,12 +2,12 @@
 <title>FlyTris · a fly at the controls</title><style>__STYLE__</style><style>__VERSUS_STYLE__</style><style>__SCORES_STYLE__</style></head>
 <body><main>
 <header><div><h1>FlyTris<span class="title-dot">.</span></h1><p class="intro">A tiny player at the controls.</p></div><div class="header-meta"><span class="badge">__STATUS__</span><p>__NEURONS__ neurons · __EDGES__ connections<br>8 learned output weights</p></div></header>
+<div class="play-invitation"><button id="versus-open" class="primary">Play against the fly <span aria-hidden="true">↗</span></button></div>
 <section class="replay-card" aria-label="Interactive fly replay">
 <div class="stage-heading"><span><span class="live-dot" id="live-dot"></span><strong id="play-status">READY TO PLAY</strong></span><span class="stage-hint">Drag to look around <button id="reset-view" aria-label="Reset camera view">↺</button></span></div>
 <div class="replay-stage"><div id="fly-stage"><div id="scene-error" hidden>3D rendering is unavailable. The recorded Tetris replay still works on the board alongside.</div><div class="scene-caption"><span class="scene-number">01 /</span><span>THE WIRED PLAYER<small>Six legs. Six connections. One game.</small></span></div></div>
 <aside class="board-panel"><div class="board-heading"><span>LIVE BOARD</span><span id="piece-label">—</span></div><canvas id="board" width="260" height="520" aria-label="Tetris replay board"></canvas><div class="score-row"><div><strong id="line-count">0</strong><small>LINES CLEARED</small></div><div><strong id="piece-count">0</strong><small>PIECES PLACED</small></div></div><p id="action-label">Press play to meet the player.</p><div id="clear-message" aria-live="polite"></div></aside></div>
 <div class="transport"><div class="transport-buttons"><button id="play" class="primary">▶ <span>Play replay</span></button><button id="step" class="secondary" title="Animate one placement">Next move</button></div><div class="scrubber"><label for="scrub"><span>REPLAY POSITION</span><span id="counter">0 / 0</span></label><input id="scrub" aria-label="Replay position" type="range" min="0" value="0"></div><label class="speed-label">SPEED<select id="speed" aria-label="Replay speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label></div>
-<div class="replay-footnote"><span><i class="wire-key"></i> Leg taps illustrate the saved rotation, column and drop.</span><span>A little head shake for every cleared row.</span></div>
 </section>
 __FALLING_SUMMARY__
 __SCORES_HTML__

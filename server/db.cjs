@@ -1,7 +1,7 @@
 const fs=require('node:fs'),path=require('node:path');
 let singleton;
 function localDatabase(filename){
-  const {DatabaseSync}=require('node:sqlite');
+  const {DatabaseSync}=process.getBuiltinModule('node:sqlite');
   if(filename!==':memory:')fs.mkdirSync(path.dirname(filename),{recursive:true});
   const db=new DatabaseSync(filename);db.exec('PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;');
   return {kind:'local',async query(sql,params=[]){const ordered=[];sql=sql.replace(/\$(\d+)/g,(_,n)=>{ordered.push(params[Number(n)-1]);return '?';});return db.prepare(sql).all(...ordered);},close(){db.close();}};
@@ -16,8 +16,8 @@ async function getDatabase(){
   return singleton=localDatabase(path.resolve('.local/leaderboard.sqlite'));
 }
 async function migrate(db){
-  for(const name of ['001_matches.sql','002_request_limits.sql']){
-    const sql=fs.readFileSync(path.join(__dirname,'../db',name),'utf8');
+  for(const name of ['001_matches.sql','002_request_limits.sql','003_checkpoints.sql']){
+    const sql=fs.readFileSync(path.join(process.cwd(),'db',name),'utf8');
     for(const statement of sql.split(';').map(s=>s.trim()).filter(Boolean))await db.query(statement);
   }
 }

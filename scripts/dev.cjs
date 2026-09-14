@@ -3,7 +3,7 @@ const {getDatabase,migrate}=require('../server/db.cjs'),api=require('../server/h
 const root=path.resolve(__dirname,'../public');
 (async()=>{const db=await getDatabase();await migrate(db);
 http.createServer(async(req,res)=>{
-  for(const h of require('../vercel.json').headers.find(h=>h.source==='/(.*)').headers)res.setHeader(h.key,h.value);
+  res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('X-Frame-Options','DENY');res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');
   const url=new URL(req.url,'http://localhost');if(url.pathname==='/api/scores'){await api(req,res);return;}
   const filename=path.resolve(root,'.'+decodeURIComponent(url.pathname==='/'?'/index.html':url.pathname));
   if(!filename.startsWith(root+path.sep)||!fs.existsSync(filename)||!fs.statSync(filename).isFile()){res.writeHead(404);res.end('Not found');return;}

@@ -73,7 +73,6 @@ Recurrence removal does not consistently reduce performance in these runs. The e
         (out/'versus-model.json').write_text(json.dumps(versus_model),encoding='utf-8')
     page = page.replace('__VERSUS_MODEL__',json.dumps(versus_model))
     page = page.replace('__VERSUS_HTML__',(web/'versus.html').read_text(encoding='utf-8'))
-    page = page.replace('<p class="intro">A tiny player at the controls.</p>', '<p class="intro">A tiny player at the controls.</p><button id="versus-open" class="primary">Play against the fly ↗</button>')
     page = page.replace('__THREE_LICENSE__',(web/'third_party/THREE-LICENSE.txt').read_text(encoding='utf-8'))
     page = page.replace('__SHAPES__',json.dumps({name:[s.tolist() for s in variants] for name,variants in zip(NAMES,ROTATIONS)}))
     for marker,name in [('__FALLING_POLICY__','falling-policy.cjs'),('__FALLING_LIVE__','falling-live.js'),('__STYLE__','style.css'),('__TIMELINE__','replay.js'),('__SCENE__','scene.js'),('__BOOT__','boot.js'),('__THREE_LIB__','third_party/three.cjs'),('__VERSUS_STYLE__','versus.css'),('__VERSUS_CORE__','versus-core.js'),('__VERSUS_UI__','versus.js'),('__SCORES_UI__','scores.js'),('__SCORES_HTML__','scores.html'),('__SCORES_STYLE__','scores.css')]:
@@ -135,9 +134,9 @@ def pack(out, include_data=False, run='runs/local'):
         files.extend((ROOT/folder).glob('*.py'))
     files.extend(p for p in (ROOT/'flytris/web').rglob('*') if p.is_file())
     files.extend((ROOT/'tests').glob('*.cjs'))
-    for folder in ['api','server','db','scripts','site-data']:
+    for folder in ['app','server','db','scripts','site-data']:
         files.extend(p for p in (ROOT/folder).rglob('*') if p.is_file())
-    for name in ['package.json','package-lock.json','vercel.json','DEPLOYMENT.md','SECURITY.md','.env.example']:
+    for name in ['package.json','package-lock.json','vercel.json','next.config.mjs','proxy.js','DEPLOYMENT.md','SECURITY.md','.env.example']:
         if (ROOT/name).exists(): files.append(ROOT/name)
     for name in ['README.md','EXPERIMENTS.md','OVERNIGHT.md','FALLING_TRAINING.md','RUN_OVERNIGHT.cmd','STOP_TRAINING.cmd','requirements.txt','requirements-gpu.txt','setup.ps1','setup.sh','NOTICE.md','LICENSE','.gitignore']:
         if (ROOT/name).exists(): files.append(ROOT/name)

@@ -41,7 +41,7 @@
   }
   function sample(state,time){
     const controls=[0,0,0,0,0,0],a=state.action,age=time-state.actionTime;
-    if(a&&age>=0&&age<150){const index={left:0,right:1,cw:2,ccw:2,soft:3,hard:3}[a.control];if(index!==undefined)controls[index]=Math.max(0,1-age/150);}
+    if(a&&age>=0&&age<150){const index={left:0,right:1,cw:2,ccw:5,soft:3,hard:3}[a.control];if(index!==undefined)controls[index]=Math.max(0,1-age/150);}
     let shake=0,cleared=0;
     for(const e of state.events){if(time-e.time>=0&&time-e.time<750)cleared=e.count;
       for(let row=0;row<e.count;row++){const t=(time-e.time-row*150)/1000;if(t>=0&&t<.45)shake+=Math.sin(t*32)*Math.sin(t/.45*Math.PI)*.055;}}

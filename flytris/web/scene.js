@@ -71,10 +71,12 @@
       const m=mesh(new T.BoxGeometry(.10,.10,.012),mat(0x667475,.7),lid);m.position.set(side*1.025,.8+j*.49,.25);
     }
     const buttons=[],buttonPositions=[[-.85,.62],[-.19,.62],[.70,.55],[-.52,1.02],[-.68,-.25],[.68,-.25]];
-    const names=['LEFT','RIGHT','ROTATE','DROP','START','SOUND'];
+    const names=['LEFT','RIGHT','CW','DROP','START','CCW'];
     const movementButtons=new Set([0,1,3]);
+    const markedButtons=new Set([0,1,2,3,5]);
     buttonPositions.forEach(([x,z],i)=>{
-      const b=mesh(new T.CylinderGeometry(i===2?.26:.15,i===2?.27:.165,.13,32),gold.clone(),device);
+      const radius=i===2?.26:i===5?.23:.15;
+      const b=mesh(new T.CylinderGeometry(radius,radius+.015,.13,32),gold.clone(),device);
       b.position.set(x,.43,z);buttons.push(b);
       if(movementButtons.has(i)){
         // Solid arrow markings stay crisp at any zoom and move with the keycap.
@@ -85,12 +87,23 @@
         geometry.rotateZ(i===0?Math.PI:i===3?-Math.PI/2:0);geometry.rotateX(-Math.PI/2);
         const mark=mesh(geometry,new T.MeshBasicMaterial({color:0x101719}),b);mark.position.y=.068;mark.castShadow=false;
       }
+      if(i===2||i===5){
+        // Clockwise arc viewed from above; mirror it for the separate CCW key.
+        const start=.3*Math.PI,end=-1.15*Math.PI,outer=.16,inner=.105;
+        const arc=new T.Shape();arc.absarc(0,0,outer,start,end,true);
+        arc.lineTo(inner*Math.cos(end),inner*Math.sin(end));arc.absarc(0,0,inner,end,start,false);arc.closePath();
+        const x=.1325*Math.cos(end),y=.1325*Math.sin(end),tx=Math.sin(end),ty=-Math.cos(end),nx=Math.cos(end),ny=Math.sin(end);
+        const tip=new T.Shape();tip.moveTo(x+tx*.08,y+ty*.08);tip.lineTo(x-tx*.022+nx*.069,y-ty*.022+ny*.069);tip.lineTo(x-tx*.022-nx*.069,y-ty*.022-ny*.069);tip.closePath();
+        const mark=new T.Group();b.add(mark);mark.position.y=.068;mark.rotation.x=-Math.PI/2;if(i===5)mark.scale.x=-1;
+        const ink=new T.MeshBasicMaterial({color:0x101719,side:T.DoubleSide});
+        for(const shape of [arc,tip]){const part=mesh(new T.ShapeGeometry(shape),ink,mark);part.castShadow=false;}
+      }
       const text=label(device,names[i],i===2?.64:.51,.17,[x,.39,z+.27],'#a7b1ac',38);text.rotation.x=-Math.PI/2;
     });
     const brand=label(device,'BRICK GAME',1.27,.3,[.12,.39,1.38],'#adb8ad',51);brand.rotation.x=-Math.PI/2;
     // Tiny metallic sockets make every cable attachment visible.
-    const endpoints=buttons.map((b,i)=>device.localToWorld(b.position.clone().add(movementButtons.has(i)?vec(0,.055,-.145):vec(0,.09,0))));
-    endpoints.forEach((p,i)=>{if(movementButtons.has(i))return;const plug=mesh(new T.SphereGeometry(.048,12,8),metal);plug.position.copy(p);});
+    const endpoints=buttons.map((b,i)=>device.localToWorld(b.position.clone().add(markedButtons.has(i)?vec(0,.055,i===2?-.255:i===5?-.225:-.145):vec(0,.09,0))));
+    endpoints.forEach((p,i)=>{if(markedButtons.has(i))return;const plug=mesh(new T.SphereGeometry(.048,12,8),metal);plug.position.copy(p);});
 
     // Anatomical silhouette: segmented abdomen, thorax, eyes, antennae, wings, six legs.
     const fly=new T.Group();fly.position.set(-2.05,.02,.35);fly.rotation.y=-Math.PI/2;scene.add(fly);

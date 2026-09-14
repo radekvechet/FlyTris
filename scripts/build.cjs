@@ -7,7 +7,6 @@ for(const [key,file] of Object.entries({STYLE:'style.css',TIMELINE:'replay.js',S
 values.FALLING_SUMMARY=falling?read('falling-summary.html'):'';
 if(falling)values.STATUS='Falling-rules checkpoint · evaluated';
 let page=fs.readFileSync(path.join(web,'report.html'),'utf8').replace(/__([A-Z_]+)__/g,(marker,key)=>{if(!(key in values))throw Error('Missing template value: '+key);return String(values[key]).replace(/<\/script/gi,'<\\/script');});
-page=page.replace('<p class="intro">A tiny player at the controls.</p>','<p class="intro">A tiny player at the controls.</p><button id="versus-open" class="primary">Play against the fly ↗</button>');
 // HTML parsers normalize newlines before CSP hashes are checked.
 page=page.replace(/\r\n?/g,'\n');
 const hashes=[...page.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(([,code])=>"'sha256-"+crypto.createHash('sha256').update(code).digest('base64')+"'");

@@ -1,4 +1,5 @@
-const {getDatabase}=require('./db.cjs'),{makeService,WINDOWS,PRESETS}=require('./scores.cjs');
+const {getDatabase}=require('./db.cjs'),{WINDOWS,PRESETS}=require('./scores.cjs');
+const {makeRankedService:makeService}=require('./ranked.cjs');
 const {originGate,clientKey,memoryLimiter,durableLimit}=require('./security.cjs');
 function createHandler({database=getDatabase,now=Date.now}={}){
 // Cache/coalesce only the 16 validated leaderboard combinations, never arbitrary URLs.
@@ -28,7 +29,7 @@ async function handler(req,res){
     if(body===undefined){const chunks=[];let size=0;for await(const chunk of req){size+=Buffer.byteLength(chunk);if(size>20000)throw Object.assign(Error('Submission too large.'),{status:413,expose:true});chunks.push(Buffer.from(chunk));}body=JSON.parse(Buffer.concat(chunks).toString());}
     else if(typeof body==='string'){if(Buffer.byteLength(body)>20000)throw Object.assign(Error('Submission too large.'),{status:413,expose:true});body=JSON.parse(body);}
     if(Buffer.byteLength(JSON.stringify(body)??'')>20000)throw Object.assign(Error('Submission too large.'),{status:413,expose:true});
-    if(!body||Array.isArray(body)||!['start','finish','rename'].includes(body.action))throw Object.assign(Error('Invalid action.'),{status:400,expose:true});
+    if(!body||Array.isArray(body)||!['start','checkpoint','finish','rename'].includes(body.action))throw Object.assign(Error('Invalid action.'),{status:400,expose:true});
     const db=await database();await durableLimit(db,key,body.action,now());
     if(now()-lastCleanup>3600000){lastCleanup=now();await db.query('DELETE FROM flytris_request_limits WHERE expires_at < $1',[lastCleanup]);}
     res.end(JSON.stringify(await makeService(db,model.metadata.model_sha256)[body.action](body)));

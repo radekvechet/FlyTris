@@ -1,7 +1,25 @@
 {
-  "name": "flytris-arena", "version": "1.0.0", "private": true,
+  "name": "flytris-arena",
+  "version": "1.0.0",
+  "private": true,
   "license": "GPL-2.0-or-later",
-  "engines": {"node": "24.x"},
-  "scripts": {"build": "node scripts/deploy-build.cjs", "dev": "node scripts/dev.cjs", "db:migrate": "node scripts/migrate.cjs", "snapshot": "node scripts/snapshot.cjs", "test:server": "node --test tests/test_scores.cjs tests/test_security.cjs tests/test_site_release.cjs"},
-  "dependencies": {"@neondatabase/serverless": "1.0.2"}
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "build": "node scripts/deploy-build.cjs",
+    "dev": "node scripts/prepare-next.cjs && next dev --hostname 127.0.0.1 --port 8765",
+    "db:migrate": "node scripts/migrate.cjs",
+    "snapshot": "node scripts/snapshot.cjs",
+    "test:server": "node --test tests/test_scores.cjs tests/test_security.cjs tests/test_ranked.cjs tests/test_site_release.cjs && node --test tests/test_next_shell.cjs",
+    "start": "next start --hostname 127.0.0.1 --port 8765",
+    "build:standalone": "node scripts/build.cjs",
+    "pool:build": "node scripts/build-ranked-pool.cjs"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "1.0.2",
+    "next": "16.3.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  }
 }

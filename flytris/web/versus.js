@@ -6,6 +6,7 @@
   const falling=model?.task==='falling-v1';let bot=null,clockRemainder=0;
   let opened=false,running=false,paused=false,worker=null,requestId=0,human,fly,settings,elapsed=0,animation=null,move=null,committed=false,baseLines=0,basePieces=0,lastResult=null,ready=false;
   let bindings=structuredClone(V.defaultBindings),scoreSession=null,startAttempt=0;
+  let rankedLog='',rankedSequence=0,rankedVerifiedMs=0,rankedWaiting=false,rankedControls=0,rankedHard=false;
   const held=new Map(),cookieName='flytris_preferences_v2';let touchSoft=false;
   function clearHeld(){held.clear();touchSoft=false;}
   function showBindings(){for(const action of Object.keys(bindings))$('key-'+action).value=bindings[action].map(V.keyLabel).join(', ');}
@@ -83,6 +84,7 @@
   }
   function think(){
     if(!running)return;
+    if(scoreSession){ready=true;return;}
     if(!fly.alive){finish('fly-topout');return;}
     const id=++requestId;ready=false;
     worker.postMessage(falling?{type:'choose',id,snapshot:bot.snapshot(),remainingMs:settings.durationMs-elapsed}:{type:'choose',id,board:fly.board,piece:fly.piece});
@@ -100,7 +102,7 @@
   async function start(event){
     event.preventDefault();if(!model)return;
     try{bindings=readBindings();}catch(error){$('match-error').textContent=error.message;return;}
-    settings={seed:Number($('seed-input').value)>>>0,gravityMs:Number($('human-pace').value),flyMs:Number($('fly-pace').value),durationMs:Number($('match-length').value),rulesVersion:falling?3:1,bindings:structuredClone(bindings),humanRules:'falling gravity, 500ms lock delay, horizontal kicks',flyRules:falling?'falling-v1, 50ms controls, midair rotation and slides':'trained placement policy'};
+    settings={seed:Number($('seed-input').value)>>>0,gravityMs:Number($('human-pace').value),flyMs:Number($('fly-pace').value),durationMs:Number($('match-length').value),rulesVersion:falling?4:1,bindings:structuredClone(bindings),humanRules:'falling gravity, 500ms lock delay, horizontal kicks',flyRules:falling?'falling-v1, 50ms controls, midair rotation and slides':'trained placement policy'};
     const attempt=++startAttempt;$('match-start').disabled=true;$('match-start').textContent='Preparing match…';
     const registeredSession=await window.FlyScores.begin(settings,model);
     if(attempt!==startAttempt||!opened)return;scoreSession=registeredSession;
@@ -110,26 +112,30 @@
     const seq=new V.Sequence(settings.seed);human=new V.FallingPlayer(seq,shapes,settings.gravityMs);
     bot=falling?new FlyFallingLive.Controller(settings.seed,shapes,settings.flyMs):null;fly=falling?bot.player:new V.Player(seq,shapes);
     stopWorker();
-    try{
-      const code=$('versus-core').textContent+(falling?'\n'+$('falling-policy').textContent+'\n'+$('falling-live').textContent:'')+`\nlet policy,shapes;onmessage=e=>{const d=e.data;try{if(d.type==='init'){policy=new FlyVersus.Policy(d.model);shapes=d.shapes;}else postMessage({id:d.id,frame:${falling?'FlyFallingLive.plan(d.snapshot,shapes,policy,d.remainingMs)':'policy.choose(FlyVersus.candidates(d.board,d.piece,shapes))'}});}catch(error){postMessage({id:d.id,error:String(error.message)});}};`;
+    if(!scoreSession){try{
+      const code=($('versus-core')?.textContent||window.FLYTRIS_SOURCES?.['versus-core']||'')+(falling?'\n'+($('falling-policy')?.textContent||window.FLYTRIS_SOURCES?.['falling-policy']||'')+'\n'+($('falling-live')?.textContent||window.FLYTRIS_SOURCES?.['falling-live']||''):'')+`\nlet policy,shapes;onmessage=e=>{const d=e.data;try{if(d.type==='init'){policy=new FlyVersus.Policy(d.model);shapes=d.shapes;}else postMessage({id:d.id,frame:${falling?'FlyFallingLive.plan(d.snapshot,shapes,policy,d.remainingMs)':'policy.choose(FlyVersus.candidates(d.board,d.piece,shapes))'}});}catch(error){postMessage({id:d.id,error:String(error.message)});}};`;
       const url=URL.createObjectURL(new Blob([code],{type:'text/javascript'}));worker=new Worker(url);URL.revokeObjectURL(url);
       worker.onmessage=e=>receive(e.data);worker.onerror=e=>{e.preventDefault();if(running)finish('error','The local model worker stopped. Please restart the match.');};
       worker.postMessage({type:'init',model,shapes});
-    }catch(error){$('match-error').textContent='Unable to start local inference: '+error.message;return;}
+    }catch(error){$('match-error').textContent='Unable to start local inference: '+error.message;return;}}
+    rankedLog='';rankedSequence=0;rankedVerifiedMs=0;rankedWaiting=false;rankedControls=0;rankedHard=false;$('match-verify-retry').hidden=true;
+    document.querySelector('.live-badge').textContent=scoreSession?'VERIFIED FLY RUN · SERVER CHECKPOINTS':'LIVE MODEL · FRESH DECISIONS';
+    $('model-description').textContent=scoreSession?'Ranked opponent: a recorded run of the trained fly. The server verifies both games every 10 seconds.':'The trained fly chooses fresh moves locally in your browser.';
     elapsed=0;clockRemainder=0;clearHeld();animation=null;move=null;paused=false;running=true;
     $('match-setup').hidden=true;$('match-summary').hidden=true;$('match-pause').disabled=false;$('match-pause').textContent='Pause match';$('match-status').textContent='MATCH IN PROGRESS';$('match-clock').textContent=clock(settings.durationMs);
     $('match-seed').textContent=`${settings.ranked?settings.difficulty.toUpperCase()+' · RANKED':'PRACTICE · UNRANKED'} · seed ${settings.seed}`;$('match-pause').focus();
     displayHuman();displayFly();think();
   }
   function control(action){
-    if(!running||paused||!human.active||(falling&&!ready))return;
+    if(!running||paused||rankedWaiting||!human.active||(falling&&!ready))return;
+    if(scoreSession){if(rankedControls>=8||(action==='hard'&&rankedHard))return;rankedControls++;if(action==='hard')rankedHard=true;rankedLog+=({left:'L',right:'R',soft:'D',hard:'H',rotate:'C',reverse:'A'})[action];}
     if(action==='left')human.move(-1);else if(action==='right')human.move(1);
     else if(action==='soft')human.move(0,1);else if(action==='hard')human.hardDrop();
     else human.rotate(action==='rotate');
     if(!human.alive){finish('human-topout');return;}displayHuman();
   }
   function pause(force){
-    if(!running)return;paused=force===undefined?!paused:force;clearHeld();
+    if(!running||rankedWaiting)return;paused=force===undefined?!paused:force;clearHeld();
     $('match-pause').textContent=paused?'Resume match':'Pause match';$('match-status').textContent=paused?'PAUSED · BOTH CLOCKS STOPPED':'MATCH IN PROGRESS';
     displayFly();
   }
@@ -143,8 +149,8 @@
     $('result-reason').textContent=error||({'time':'Time is up. Ranked by lines cleared, then pieces placed.','human-topout':'Your board topped out. The fly takes this round.','fly-topout':'The fly topped out. You take this round.'}[reason]);
     const rows=[['Lines cleared',human.lines,fly.lines],['Pieces placed',human.pieces,fly.pieces],['Single / double / triple / Tetris',human.clears.join(' / '),fly.clears.join(' / ')],['Lines per minute',(human.lines/Math.max(elapsed/60000,1/60)).toFixed(1),(fly.lines/Math.max(elapsed/60000,1/60)).toFixed(1)]];
     $('result-rows').replaceChildren(...rows.map(row=>{const tr=document.createElement('tr');row.forEach(value=>{const td=document.createElement('td');td.textContent=value;tr.appendChild(td);});return tr;}));
-    $('result-settings').textContent=falling?`Played ${clock(elapsed)} · seed ${settings.seed} · human / fly gravity ${settings.gravityMs} / ${settings.flyMs}ms. Shared sequence and falling rules; fly controls every 50ms. Planning pauses both clocks.`:`Played ${clock(elapsed)} · seed ${settings.seed} · legacy placement match.`;
-    window.FlyScores.complete(lastResult,scoreSession);
+    $('result-settings').textContent=falling?`Played ${clock(elapsed)} · seed ${settings.seed} · human / fly gravity ${settings.gravityMs} / ${settings.flyMs}ms. Shared sequence and falling rules; fly controls every 50ms. Ranked moves are verified in 10-second batches; practice pauses while the fly plans.`:`Played ${clock(elapsed)} · seed ${settings.seed} · legacy placement match.`;
+    window.FlyScores.complete(lastResult,scoreSession,()=>verifyProgress(true));
     animation=null;displayHuman();displayFly();$('match-summary').hidden=false;$('match-again').focus();
   }
   $('versus-open').addEventListener('click',open);$('match-form').addEventListener('submit',start);
@@ -174,16 +180,35 @@
   window.addEventListener('blur',()=>{clearHeld();if(opened)pause(true);});
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&opened)pause(true);});
   let last=performance.now();
+  async function verifyProgress(final=false){
+    if(!scoreSession||!rankedLog)return;
+    const session=scoreSession,attempt=startAttempt,sequence=rankedSequence+1,commands=rankedLog;
+    const expected={human:{lines:human.lines,pieces:human.pieces,board:structuredClone(human.board)},fly:{lines:fly.lines,pieces:fly.pieces,board:structuredClone(fly.board)},elapsedMs:elapsed};
+    rankedWaiting=true;$('match-verify-retry').hidden=true;$('match-pause').disabled=true;
+    if(!final)$('match-status').textContent='VERIFYING MOVES';
+    try{
+      const receipt=await window.FlyScores.checkpoint(session,sequence,commands);
+      if(scoreSession!==session||attempt!==startAttempt)throw Error('The match changed.');
+      if(receipt.elapsedMs!==expected.elapsedMs||['human','fly'].some(side=>['lines','pieces','board'].some(key=>JSON.stringify(receipt[side][key])!==JSON.stringify(expected[side][key]))))throw Error('The game differs from the server verification.');
+      rankedSequence=sequence;rankedLog='';rankedVerifiedMs=elapsed;rankedWaiting=false;
+      if(!final){$('match-pause').disabled=false;$('match-status').textContent=paused?'PAUSED':'MATCH IN PROGRESS';}
+    }catch(error){if(scoreSession===session&&attempt===startAttempt&&!final){$('match-status').textContent='VERIFICATION PAUSED · '+error.message;$('match-verify-retry').hidden=false;}throw error;}
+  }
+  $('match-verify-retry').addEventListener('click',()=>verifyProgress().catch(()=>{}));
   function fallingTick(dt){
+    if(rankedWaiting)return;
     if(!ready){displayFly();return;}
     clockRemainder+=dt;
     while(clockRemainder>=50&&running&&ready){
-      clockRemainder-=50;elapsed+=50;bot.step();
+      clockRemainder-=50;elapsed+=50;if(scoreSession)rankedLog+='B';bot.step(scoreSession?scoreSession.flyRun.actions[elapsed/50-1]:undefined);
       for(const state of held.values()){if(state.action==='left'||state.action==='right'){state.age+=50;while(state.age>=state.next){control(state.action);state.next+=65;}}}
-      human.tick(50,touchSoft||[...held.values()].some(s=>s.action==='soft'));
+      if(!running)break;
+      const soft=touchSoft||[...held.values()].some(s=>s.action==='soft');if(scoreSession)rankedLog+=soft?'S':'T';
+      human.tick(50,soft);rankedControls=0;rankedHard=false;
       if(!human.alive){finish('human-topout');break;}if(!fly.alive){finish('fly-topout');break;}
       if(elapsed>=settings.durationMs){finish('time');break;}
-      if(!bot.ready){clockRemainder=0;think();}
+      if(scoreSession&&elapsed-rankedVerifiedMs>=10000){clockRemainder=0;verifyProgress().catch(()=>{});break;}
+      if(!scoreSession&&!bot.ready){clockRemainder=0;think();}
     }
     if(running){displayHuman();displayFly(dt);$('match-clock').textContent=clock(settings.durationMs-elapsed);}
   }

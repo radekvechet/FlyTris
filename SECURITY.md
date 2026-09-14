@@ -11,8 +11,9 @@ them in public variables, HTML, browser JavaScript, logs or screenshots.
 
 Neon errors return a generic unavailable message. Match tokens are random
 capabilities; only token hashes are stored. SQL values are parameterized and
-player names render as text. The scorebook validates plausible results but is
-not cheat-proof: client-supplied results are not replay-verified on the server.
+player names render as text. Ranked games replay input batches on the server. Both scores and the winner
+are derived from verified state, not trusted client totals. This verifies legal
+gameplay, not human identity: a bot can still send legal moves in real time.
 
 ## Application controls
 
@@ -29,8 +30,8 @@ not cheat-proof: client-supplied results are not replay-verified on the server.
 - Application limits: 60 API requests per minute per IP, plus 600 per minute
   per warm function instance. Memory limits reset on a cold start and are not
   global across Vercel instances. Expired IP entries are discarded.
-- Neon-backed atomic limits: 6 match starts and 20 finish/name-update attempts
-  per IP per minute (finish and rename share the latter budget). These persist
+- Neon-backed atomic limits: 6 match starts and 20 checkpoint/finish/name-update attempts
+  per IP per minute (checkpoints, finish and rename share the latter budget). These persist
   across instances. Fixed windows can allow a burst at a minute boundary.
   Vercel's overwritten forwarding header identifies IPs on Vercel; local
   development ignores forwarding headers and uses the socket peer. The database
@@ -43,8 +44,10 @@ not cheat-proof: client-supplied results are not replay-verified on the server.
 - JSON submissions are limited to 20 KB, including UTF-8 byte size; malformed,
   oversized, compressed or unsupported requests are rejected. Rate limits return
   HTTP 429 and `Retry-After: 60`.
-- Static pages authorize their exact inline scripts with CSP hashes, allow the
-  local fly worker, and restrict network connections to their own origin.
+- Next.js pages use fresh CSP nonces for framework and game scripts, allow the
+  local practice worker, and restrict network connections to their own origin.
+  The standalone report uses CSP hashes. Production disallows script eval; the
+  development server permits it for Next.js debugging.
   Frame embedding, plugins, MIME sniffing and unused sensitive browser features
   are disabled. Inline CSS remains allowed for the existing animated UI.
 
@@ -83,3 +86,33 @@ caching, safe errors, two-minute scoring, historical leaderboard isolation and
 static secret/CSP checks. SQLite runs the migration and SQL tests locally; Neon
 uses the same parameterized queries through its serverless driver. Do not load
 test the production site without a separate, agreed test plan.
+
+## Ranked verification and remaining limits
+
+The server selects the seed and a precomputed fly run, reconstructs both boards
+from ordered input batches, and persists each accepted revision with an atomic
+compare-and-swap update. Batches cover at most ten simulated seconds and 2,200
+command characters, with at most eight human controls and one hard drop per
+50 ms tick. Simulation may not get more than 1,000 ms ahead of the total server
+clock or 250 ms ahead between checkpoints; this small tolerance allows scheduling
+jitter. Earlier accepted inputs cannot be rewritten. Results remain NULL until a
+verified terminal state is finalized. Failed verification does not update scores.
+
+The private token authenticates access to one session; it does not identify a
+person. No client can submit a different fly run or directly write score columns
+through the API. A valid fully replayed result may still be machine-assisted.
+Players can inspect the public model and the small repeated seed pool, prepare
+moves in advance, use automation, or run multiple sessions. Server checkpoints
+constrain result forgery and timing, not those forms of assistance. An
+anti-cheat-proof or identity-verified competition would need additional measures.
+
+The pool is generated offline and reused; the web server only simulates physics,
+not neural route search. Full-length games normally make 12 checkpoint requests,
+plus start, finish and an optional name update. Each checkpoint uses a rate-limit
+query, a session/state read and an atomic state update. Neon network latency and
+usage vary; local timings are not a hosting-price estimate. No load test was run
+against production.
+
+Checkpoint rows retain accepted game state and a last-batch hash, not the full
+input history. Old score and checkpoint rows are preserved; no automatic deletion
+of gameplay history is configured. Unfinished sessions never enter rankings.

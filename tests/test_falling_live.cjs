@@ -29,3 +29,9 @@ test('browser wrapper and worker-style loading use the same controller without N
   vm.runInContext(fs.readFileSync('flytris/web/falling-live.js','utf8'),context);
   assert.equal(vm.runInContext('typeof FlyFallingLive.plan',context),'function');
 });
+
+test('clockwise and anticlockwise actions animate different wired buttons',()=>{
+  const c=new L.Controller(1,shapes,500);
+  c.step('cw');assert(c.sample(25).controls[2]>0);assert.equal(c.sample(25).controls[5],0);
+  c.step('ccw');assert(c.sample(25).controls[5]>0);assert.equal(c.sample(25).controls[2],0);
+});
