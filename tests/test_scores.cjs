@@ -40,7 +40,7 @@ test('ranking sorts by lines then pieces; aborted sessions are excluded',async()
     for(const pieces of [5,6]){const s=await f.service.start({difficulty:'medium',rulesVersion:3,modelHash:'model-test'});f.add(120000);const r=result(s);r.human=stats(2,pieces);await f.service.finish({...s,result:r});}
     const d=await f.service.leaderboard('all');assert.equal(d.summary.matches,2);assert.deepEqual(d.lists.medium.map(r=>r.human_pieces),[6,5]);
     await assert.rejects(f.service.leaderboard('invalid'));await assert.rejects(f.service.leaderboard('all','invalid'));
-    assert.equal(name('\u0000  '),'anonymous');assert.equal(name('a'.repeat(40)).length,30);
+    assert.equal(name('\u0000  '),'anonymous');assert.equal(name('a'.repeat(80)).length,60);
   }finally{f.db.close();}
 });
 test('local scores persist after closing and reopening the database',async()=>{

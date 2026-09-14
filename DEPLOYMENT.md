@@ -59,7 +59,7 @@ To run migrations separately with a server environment configured, use
   reason and server completion timestamp. Repeating the submission is idempotent.
   Started but unfinished sessions do not enter rankings or aggregates.
 - The display name starts as `anonymous`; blank names remain `anonymous`. Names
-  are limited to 30 characters, treated as text, and editable with the match token
+  are limited to 60 characters, treated as text, and editable with the match token
   for one hour. Names are not authenticated identities. The token is not returned
   by public leaderboard queries or included in the downloadable match result.
 - Public lists show the top 10 human scores for each difficulty, paired with that

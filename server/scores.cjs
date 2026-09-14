@@ -4,7 +4,7 @@ const WINDOWS={'24h':86400000,'7d':7*86400000,'30d':30*86400000,all:null};
 const fail=(message,status=400)=>{throw Object.assign(new Error(message),{status,expose:true});};
 const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 const integer=(v,min,max)=>Number.isInteger(v)&&v>=min&&v<=max;
-function name(value){if(typeof value!=='string')return 'anonymous';const n=value.normalize('NFKC').replace(/[\p{Cc}\p{Cf}]/gu,'').trim().replace(/\s+/g,' ');return n.slice(0,30)||'anonymous';}
+function name(value){if(typeof value!=='string')return 'anonymous';const n=value.normalize('NFKC').replace(/[\p{Cc}\p{Cf}]/gu,'').trim().replace(/\s+/g,' ');return n.slice(0,60)||'anonymous';}
 function validateStats(s){
   if(!s||!integer(s.lines,0,2000)||!integer(s.pieces,0,5000)||typeof s.alive!=='boolean')fail('Invalid score.');
   if(!Array.isArray(s.clears)||s.clears.length!==4||!s.clears.every(v=>integer(v,0,5000))||s.clears.reduce((n,v,i)=>n+v*(i+1),0)!==s.lines)fail('Invalid row-clear totals.');
