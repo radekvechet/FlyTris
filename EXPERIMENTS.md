@@ -10,8 +10,8 @@ v783 connectivity**, with eight output weights trained to play Tetris.
 **Falling-rules training:** `RUN_OVERNIGHT.cmd` now starts/resumes a six-hour
 budget using the browser's falling physics, midair rotation and legal slides.
 See [FALLING_TRAINING.md](FALLING_TRAINING.md) for progress, pause/resume and
-evaluation details. The existing dashboard model remains separate until the
-new controller and weights are integrated.
+evaluation details. The dashboard now uses an evaluated falling-rules checkpoint; the original
+placement experiments described here remain a separate historical comparison.
 
 This project distinguishes two experiments:
 

@@ -2,7 +2,7 @@ const {getDatabase}=require('./db.cjs');const {makeService}=require('./scores.cj
 async function handler(req,res){
   res.setHeader('Cache-Control','no-store');res.setHeader('Content-Type','application/json; charset=utf-8');
   try{
-    const db=await getDatabase();const model=require('../site-data/versus-model.json');const service=makeService(db,model.metadata.graph_sha256);
+    const db=await getDatabase();const model=require('../site-data/versus-model.json');const service=makeService(db,model.metadata.model_sha256);
     if(req.method==='GET'){
       const url=new URL(req.url,'http://localhost');res.end(JSON.stringify(await service.leaderboard(url.searchParams.get('window')||'24h',url.searchParams.get('difficulty')||'all')));return;
     }

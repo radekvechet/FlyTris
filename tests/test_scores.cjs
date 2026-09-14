@@ -3,7 +3,7 @@ const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const {localDatabase,migrate}=require('../server/db.cjs');const {makeService,name}=require('../server/scores.cjs');
 const empty=()=>Array.from({length:20},()=>Array(10).fill(0));
 function stats(lines=2,pieces=5,alive=true){const board=empty();let n=pieces*4-lines*10;for(let y=19;y>=0;y--)for(let x=0;x<10;x++)if(n-->0)board[y][x]=1;return {lines,pieces,alive,clears:[lines,0,0,0],board};}
-function result(s){return {settings:{...s.settings,seed:s.seed},model:{graph_sha256:'model-test'},elapsedSeconds:180,reason:'time',human:stats(),fly:stats(1,4)};}
+function result(s){return {settings:{...s.settings,seed:s.seed},model:{model_sha256:'model-test'},elapsedSeconds:180,reason:'time',human:stats(),fly:stats(1,4)};}
 async function fixture(){const db=localDatabase(':memory:');await migrate(db);let time=Date.UTC(2026,8,14,12);return {db,service:makeService(db,'model-test',()=>time),add:n=>time+=n,set:n=>time=n,now:()=>time};}
 test('one timestamped match atomically records both scores; retries do not duplicate',async()=>{
   const f=await fixture();try{const s=await f.service.start({difficulty:'medium',modelHash:'model-test'});f.add(180000);
@@ -46,4 +46,20 @@ test('local scores persist after closing and reopening the database',async()=>{
   try{db=localDatabase(file);await migrate(db);let t=1000000;const service=makeService(db,'model-test',()=>t),s=await service.start({difficulty:'hard',modelHash:'model-test'});t+=180000;await service.finish({...s,result:result(s)});db.close();db=localDatabase(file);
     assert.equal((await makeService(db,'model-test',()=>t).leaderboard('all')).summary.matches,1);
   }finally{db?.close();for(const suffix of ['','-wal','-shm'])if(fs.existsSync(file+suffix))fs.unlinkSync(file+suffix);fs.rmdirSync(dir);}
+});
+
+test('falling matches accept legal rapid controls and isolate legacy leaderboard rows',async()=>{
+  const f=await fixture();try{
+    const s=await f.service.start({difficulty:'medium',modelHash:'model-test'});f.add(1000);
+    const r=result(s);r.elapsedSeconds=1;r.reason='human-topout';r.human=stats(0,10,false);r.fly=stats(10,25);
+    await assert.rejects(f.service.finish({...s,result:r}),/pace/);
+    r.fly=stats(4,10);await f.service.finish({...s,result:r});
+    assert.equal((await f.db.query('SELECT rules_version FROM flytris_matches WHERE id=$1',[s.id]))[0].rules_version,2);
+    assert.equal((await f.service.leaderboard('all')).lists.medium[0].fly_pieces,10);
+    await f.db.query('UPDATE flytris_matches SET rules_version=1 WHERE id=$1',[s.id]);
+    assert.equal((await f.service.leaderboard('all')).summary.matches,0);
+    assert.equal((await f.db.query('SELECT COUNT(*) AS n FROM flytris_matches'))[0].n,1);
+    const fresh=await f.service.start({difficulty:'medium',modelHash:'model-test'});f.add(180000);
+    await assert.rejects(f.service.finish({...fresh,result:{...result(fresh),model:{model_sha256:'different-weights'}}}),/settings/);
+  }finally{f.db.close();}
 });

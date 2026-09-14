@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const timeline=new FlyReplay.ReplayTimeline(window.FLYTRIS_DATA,window.FLYTRIS_SHAPES);
+  const timeline=new (window.FLYTRIS_DATA.rules==='falling-v1'?FlyFallingLive.ReplayTimeline:FlyReplay.ReplayTimeline)(window.FLYTRIS_DATA,window.FLYTRIS_SHAPES);
   const board=document.getElementById('board'),ctx=board.getContext('2d');
   const lcd=document.createElement('canvas');lcd.width=260;lcd.height=520;const lc=lcd.getContext('2d');
   const playButton=document.getElementById('play'),stepButton=document.getElementById('step');

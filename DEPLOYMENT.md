@@ -7,7 +7,8 @@ from Git, public assets, and the portable ZIP.
 
 ## Deploy
 
-1. Import this repository into Vercel. Use the repository root, framework **Other**,
+1. Import this repository into Vercel. Set **Root Directory to `.` (repository root)**,
+   not `flytris/web`. Choose framework **Other**,
    Node.js **24.x**, and the supplied `vercel.json`. It sets `npm run build` and the
    `public` output folder. The root `api/scores.js` becomes a Node.js function.
 2. Add a **Neon Postgres** database through Vercel's Marketplace and connect it to
@@ -21,9 +22,17 @@ from Git, public assets, and the portable ZIP.
 
 The committed `site-data` snapshot contains the model and measured report inputs.
 Vercel needs neither Python, CUDA, nor the full downloaded connectome to serve this
-snapshot. To update it after local training, regenerate the Python report, run
-`node scripts/snapshot.cjs`, inspect the changed snapshot, and deploy it together
-with the source. Scientific table formatting is preserved from the Python report.
+snapshot. For a falling-rules update, run `node scripts/evaluate-falling.cjs`
+against the saved training run, then `node scripts/integrate-falling.cjs` against
+that evaluation directory. Inspect results and push the changed source/snapshot.
+`snapshot.cjs` refuses to overwrite a falling release with a placement model unless
+`--legacy` is explicitly supplied. Historical placement measurements stay separate.
+
+If a build says "No Output Directory named public found", check Root Directory
+first. The build creates `public/` at repository root. Keep Output Directory as
+`public`, Build Command as `npm run build`, and Install Command as `npm install`.
+Remove an empty `DATABASE_URL` until Neon is connected; its absence disables
+shared scores but does not prevent the static site from building.
 
 Useful commands with Node.js 24 and npm installed:
 
@@ -41,8 +50,10 @@ To run migrations separately with a server environment configured, use
 
 ## Rules and stored data
 
-- Ranked matches use fixed three-minute presets: Easy (800 ms human gravity / 5 s
-  fly pace), Medium (500 ms / 3 s), Hard (250 ms / 1.5 s). Other settings are practice.
+- Ranked matches use fixed three-minute presets: Easy (800 ms gravity), Medium
+  (500 ms), Hard (250 ms), applied to both players. The fly executes trained routes
+  in 50 ms control steps. Both simulation clocks wait during worker planning.
+  Custom gravity or duration settings are practice.
 - A server-created match assigns its seed, preset, model graph ID and start time.
   A private random token authorizes finishing that match and setting its name.
 - Finishing updates one row atomically with both players' lines and pieces, winner,
@@ -58,9 +69,11 @@ To run migrations separately with a server environment configured, use
   month), and all time. Boundaries use UTC milliseconds; displayed dates use the
   viewer's local timezone. Chart totals cover *all* matching completed games,
   not just the top ten, and can be filtered by difficulty.
-- `rules_version=1` isolates this ranked rule set. Increase it when changing ranked
-  rules and explicitly decide whether to migrate old rankings. Model graph IDs
-  are retained with matches; current charts aggregate all models in the rule set.
+- New sessions explicitly use `rules_version=2`. Old rows remain in the database
+  under version 1 and are excluded from the new leaderboards and chart totals.
+  No destructive migration is needed. The stored model ID includes readout weights,
+  graph, controller and rules, so changing weights invalidates stale clients.
+  Current charts aggregate models within the same rule version.
 
 ## Validation and operational limits
 

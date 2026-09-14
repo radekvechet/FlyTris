@@ -9,8 +9,9 @@
 <div class="transport"><div class="transport-buttons"><button id="play" class="primary">▶ <span>Play replay</span></button><button id="step" class="secondary" title="Animate one placement">Next move</button></div><div class="scrubber"><label for="scrub"><span>REPLAY POSITION</span><span id="counter">0 / 0</span></label><input id="scrub" aria-label="Replay position" type="range" min="0" value="0"></div><label class="speed-label">SPEED<select id="speed" aria-label="Replay speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label></div>
 <div class="replay-footnote"><span><i class="wire-key"></i> Leg taps illustrate the saved rotation, column and drop.</span><span>A little head shake for every cleared row.</span></div>
 </section>
+__FALLING_SUMMARY__
 __SCORES_HTML__
-<div class="results-layout"><section class="card"><div class="section-eyebrow">THE MEASUREMENTS</div><h2>Learning, measured.</h2><div class="table-scroll"><table><thead><tr><th>Run</th><th>Before</th><th>After</th><th>Gain [95% CI]</th><th>Training</th></tr></thead><tbody>__TABLE__</tbody></table></div><p>Mean lines cleared on identical, unseen piece sequences. This replay is the first held-out game from the first training run.</p><div class="stats"><div><strong>__RAW__</strong><small>Trained raw-feature control</small></div><div><strong>__RANDOM__</strong><small>Random placements</small></div></div></section>
+<div class="results-layout"><section class="card"><div class="section-eyebrow">THE MEASUREMENTS</div><h2>Original placement experiments.</h2><div class="table-scroll"><table><thead><tr><th>Run</th><th>Before</th><th>After</th><th>Gain [95% CI]</th><th>Training</th></tr></thead><tbody>__TABLE__</tbody></table></div><p>Mean lines cleared on identical, unseen piece sequences. These historical trials used placement rules; their results are separate from the current falling-rules checkpoint.</p><div class="stats"><div><strong>__RAW__</strong><small>Trained raw-feature control</small></div><div><strong>__RANDOM__</strong><small>Random placements</small></div></div></section>
 <section class="card explanation"><div class="section-eyebrow">UNDER THE SHELL</div><h2>What actually learns?</h2><p>Board features enter a fixed fly-derived spiking circuit. Eight learned output weights choose a placement from its activity.</p><p class="note">The fly animation illustrates recorded decisions. It is not a biomechanical simulation. Removing recurrent connections did not consistently hurt performance in these trials, so fly wiring has not been shown to be essential.</p><nav><a href="REPORT.md">Protocol ↗</a> · <a href="MEASUREMENTS.md">Hardware and scaling</a> · <a href="results.json">Raw results ↗</a></nav></section></div>
 <footer>FLYTRIS / LOCAL RESEARCH PLAYGROUND<span>Recorded policy. Real connectome data.</span></footer>
 </main>
@@ -20,6 +21,7 @@ __THREE_LICENSE__
 -->
 <script>(function(){const exports={};__THREE_LIB__;window.THREE=exports;})();</script>
 <script>__TIMELINE__</script><script>__SCENE__</script>
-<script>window.FLYTRIS_DATA=__DATA__;window.FLYTRIS_SHAPES=__SHAPES__;</script><script>__BOOT__</script>
-<script>window.FLYTRIS_MODEL=__VERSUS_MODEL__;</script><script id="versus-core">__VERSUS_CORE__</script><script>__SCORES_UI__</script><script>__VERSUS_UI__</script>
+<script>window.FLYTRIS_DATA=__DATA__;window.FLYTRIS_SHAPES=__SHAPES__;</script><script>window.FLYTRIS_MODEL=__VERSUS_MODEL__;</script><script id="versus-core">__VERSUS_CORE__</script>
+<script id="falling-policy">(function(){const module={exports:{}},require=()=>FlyVersus;__FALLING_POLICY__;globalThis.FlyFalling=module.exports;})();</script><script id="falling-live">__FALLING_LIVE__</script>
+<script>__BOOT__</script><script>__SCORES_UI__</script><script>__VERSUS_UI__</script>
 </body></html>

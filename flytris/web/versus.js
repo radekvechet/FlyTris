@@ -3,6 +3,7 @@
   const $=id=>document.getElementById(id),V=window.FlyVersus,shapes=window.FLYTRIS_SHAPES,model=window.FLYTRIS_MODEL;
   const arena=$('versus'),report=document.querySelector('main'),stage=$('fly-stage'),home=stage.parentNode,anchor=stage.nextSibling;
   const humanCtx=$('human-board').getContext('2d'),flyCtx=$('fly-board').getContext('2d'),view=window.FlyReport;
+  const falling=model?.task==='falling-v1';let bot=null,clockRemainder=0;
   let opened=false,running=false,paused=false,worker=null,requestId=0,human,fly,settings,elapsed=0,animation=null,move=null,committed=false,baseLines=0,basePieces=0,lastResult=null,ready=false;
   let bindings=structuredClone(V.defaultBindings),scoreSession=null,startAttempt=0;
   const held=new Map(),cookieName='flytris_preferences_v2';let touchSoft=false;
@@ -42,7 +43,7 @@
   }
   function open(){
     view.pause();opened=true;report.hidden=true;arena.hidden=false;document.body.classList.add('in-match');$('versus-scene-slot').appendChild(stage);
-    $('model-description').textContent=model?`${model.metadata.neurons} fly neurons · ${model.metadata.edges.toLocaleString()} connections · trained seed ${model.training_seed}. Decisions run locally in your browser.`:'Live model unavailable.';
+    $('model-description').textContent=model?`${model.metadata.neurons} fly neurons · ${model.metadata.edges.toLocaleString()} connections · ${falling?'falling-rules checkpoint · generation '+model.generation:'trained seed '+model.training_seed}. Decisions run locally in your browser.`:'Live model unavailable.';
     view.scene?.reset();setup();
   }
   function close(){
@@ -65,6 +66,13 @@
     $('drop-progress').style.transform=`scaleX(${human.grounded?Math.max(0,1-human.lockTime/500):1})`;
   }
   function displayFly(dt=0){
+    if(falling&&bot){
+      const s=bot.sample();view.drawBoard(flyCtx,s);view.drawBoard(view.lcd.getContext('2d'),s,true);
+      view.scene?.update(s,dt,running&&!paused,matchMedia('(prefers-reduced-motion: reduce)').matches);
+      $('fly-lines').textContent=fly.lines;$('fly-pieces').textContent=fly.pieces;
+      $('fly-action').textContent=running&&!ready?'Planning the next route · match clock waiting':s.action?`${s.action.piece} · ${s.action.control} · row ${s.action.y+1}`:'Ready to play';
+      $('fly-clear').textContent=s.cleared?`+${s.cleared} ${s.cleared===1?'ROW':'ROWS'} · NICE MOVE`:'';return;
+    }
     const s=animation?animation.sample():idle(fly.board);
     view.drawBoard(flyCtx,s);view.drawBoard(view.lcd.getContext('2d'),s,true);
     view.scene?.update(s,dt,!!animation&&running&&!paused,matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -76,11 +84,14 @@
     if(!running)return;
     if(!fly.alive){finish('fly-topout');return;}
     const id=++requestId;ready=false;
-    worker.postMessage({type:'choose',id,board:fly.board,piece:fly.piece});
+    worker.postMessage(falling?{type:'choose',id,snapshot:bot.snapshot(),remainingMs:settings.durationMs-elapsed}:{type:'choose',id,board:fly.board,piece:fly.piece});
   }
   function receive(data){
     if(!running||data.id!==requestId)return;
     if(data.error){finish('error',data.error);return;}
+    if(falling){
+      try{bot.accept(data.frame);ready=true;displayFly();}catch(error){finish('error',error.message);}return;
+    }
     move=data.frame;if(!move){finish('fly-topout');return;}
     baseLines=fly.lines;basePieces=fly.pieces;committed=false;
     animation=new FlyReplay.ReplayTimeline({initialBoard:fly.board,frames:[move]},shapes);animation.play(true);ready=true;
@@ -88,28 +99,29 @@
   async function start(event){
     event.preventDefault();if(!model)return;
     try{bindings=readBindings();}catch(error){$('match-error').textContent=error.message;return;}
-    settings={seed:Number($('seed-input').value)>>>0,gravityMs:Number($('human-pace').value),flyMs:Number($('fly-pace').value),durationMs:Number($('match-length').value),bindings:structuredClone(bindings),humanRules:'falling gravity, 500ms lock delay, horizontal kicks',flyRules:'trained placement policy'};
+    settings={seed:Number($('seed-input').value)>>>0,gravityMs:Number($('human-pace').value),flyMs:Number($('fly-pace').value),durationMs:Number($('match-length').value),rulesVersion:falling?2:1,bindings:structuredClone(bindings),humanRules:'falling gravity, 500ms lock delay, horizontal kicks',flyRules:falling?'falling-v1, 50ms controls, midair rotation and slides':'trained placement policy'};
     const attempt=++startAttempt;$('match-start').disabled=true;$('match-start').textContent='Preparing match…';
     const registeredSession=await window.FlyScores.begin(settings,model);
     if(attempt!==startAttempt||!opened)return;scoreSession=registeredSession;
     $('match-start').disabled=false;$('match-start').textContent='Start match →';
     if(scoreSession){settings.seed=scoreSession.seed;settings.difficulty=scoreSession.difficulty;settings.ranked=true;}else{settings.ranked=false;}
     savePreferences();$('keyboard-hint').textContent=controlHint();
-    const seq=new V.Sequence(settings.seed);human=new V.FallingPlayer(seq,shapes,settings.gravityMs);fly=new V.Player(seq,shapes);
+    const seq=new V.Sequence(settings.seed);human=new V.FallingPlayer(seq,shapes,settings.gravityMs);
+    bot=falling?new FlyFallingLive.Controller(settings.seed,shapes,settings.flyMs):null;fly=falling?bot.player:new V.Player(seq,shapes);
     stopWorker();
     try{
-      const code=$('versus-core').textContent+`\nlet policy,shapes;onmessage=e=>{const d=e.data;try{if(d.type==='init'){policy=new FlyVersus.Policy(d.model);shapes=d.shapes;}else postMessage({id:d.id,frame:policy.choose(FlyVersus.candidates(d.board,d.piece,shapes))});}catch(error){postMessage({id:d.id,error:String(error.message)});}};`;
+      const code=$('versus-core').textContent+(falling?'\n'+$('falling-policy').textContent+'\n'+$('falling-live').textContent:'')+`\nlet policy,shapes;onmessage=e=>{const d=e.data;try{if(d.type==='init'){policy=new FlyVersus.Policy(d.model);shapes=d.shapes;}else postMessage({id:d.id,frame:${falling?'FlyFallingLive.plan(d.snapshot,shapes,policy,d.remainingMs)':'policy.choose(FlyVersus.candidates(d.board,d.piece,shapes))'}});}catch(error){postMessage({id:d.id,error:String(error.message)});}};`;
       const url=URL.createObjectURL(new Blob([code],{type:'text/javascript'}));worker=new Worker(url);URL.revokeObjectURL(url);
       worker.onmessage=e=>receive(e.data);worker.onerror=e=>{e.preventDefault();if(running)finish('error','The local model worker stopped. Please restart the match.');};
       worker.postMessage({type:'init',model,shapes});
     }catch(error){$('match-error').textContent='Unable to start local inference: '+error.message;return;}
-    elapsed=0;clearHeld();animation=null;move=null;paused=false;running=true;
+    elapsed=0;clockRemainder=0;clearHeld();animation=null;move=null;paused=false;running=true;
     $('match-setup').hidden=true;$('match-summary').hidden=true;$('match-pause').disabled=false;$('match-pause').textContent='Pause match';$('match-status').textContent='MATCH IN PROGRESS';$('match-clock').textContent=clock(settings.durationMs);
     $('match-seed').textContent=`${settings.ranked?settings.difficulty.toUpperCase()+' · RANKED':'PRACTICE · UNRANKED'} · seed ${settings.seed}`;$('match-pause').focus();
     displayHuman();displayFly();think();
   }
   function control(action){
-    if(!running||paused||!human.active)return;
+    if(!running||paused||!human.active||(falling&&!ready))return;
     if(action==='left')human.move(-1);else if(action==='right')human.move(1);
     else if(action==='soft')human.move(0,1);else if(action==='hard')human.hardDrop();
     else human.rotate(action==='rotate');
@@ -125,12 +137,12 @@
     running=false;paused=false;clearHeld();stopWorker();$('match-pause').disabled=true;$('match-status').textContent='MATCH COMPLETE';
     const winner=reason==='error'?null:V.result(human,fly,reason);
     const stats=p=>({lines:p.lines,pieces:p.pieces,clears:p.clears.slice(),alive:p.alive,board:p.board});
-    lastResult={version:2,date:new Date().toISOString(),reason,winner,elapsedSeconds:elapsed/1000,settings,model:{...model.metadata,training_seed:model.training_seed,generation:model.generation},human:stats(human),fly:stats(fly)};
+    lastResult={version:falling?3:2,date:new Date().toISOString(),reason,winner,elapsedSeconds:elapsed/1000,settings,model:{...model.metadata,training_seed:model.training_seed,generation:model.generation,task:model.task},human:stats(human),fly:stats(fly)};
     $('result-title').textContent=winner==='human'?'You win.':winner==='fly'?'The fly wins.':winner==='draw'?'An even match.':'Match interrupted.';
     $('result-reason').textContent=error||({'time':'Time is up. Ranked by lines cleared, then pieces placed.','human-topout':'Your board topped out. The fly takes this round.','fly-topout':'The fly topped out. You take this round.'}[reason]);
     const rows=[['Lines cleared',human.lines,fly.lines],['Pieces placed',human.pieces,fly.pieces],['Single / double / triple / Tetris',human.clears.join(' / '),fly.clears.join(' / ')],['Lines per minute',(human.lines/Math.max(elapsed/60000,1/60)).toFixed(1),(fly.lines/Math.max(elapsed/60000,1/60)).toFixed(1)]];
     $('result-rows').replaceChildren(...rows.map(row=>{const tr=document.createElement('tr');row.forEach(value=>{const td=document.createElement('td');td.textContent=value;tr.appendChild(td);});return tr;}));
-    $('result-settings').textContent=`Played ${clock(elapsed)} · seed ${settings.seed} · gravity ${settings.gravityMs}ms per row · fly pace ${settings.flyMs/1000}s. Shared sequence; human falling rules, fly placement rules.`;
+    $('result-settings').textContent=falling?`Played ${clock(elapsed)} · seed ${settings.seed} · human / fly gravity ${settings.gravityMs} / ${settings.flyMs}ms. Shared sequence and falling rules; fly controls every 50ms. Planning pauses both clocks.`:`Played ${clock(elapsed)} · seed ${settings.seed} · legacy placement match.`;
     window.FlyScores.complete(lastResult,scoreSession);
     animation=null;displayHuman();displayFly();$('match-summary').hidden=false;$('match-again').focus();
   }
@@ -161,9 +173,23 @@
   window.addEventListener('blur',()=>{clearHeld();if(opened)pause(true);});
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&opened)pause(true);});
   let last=performance.now();
+  function fallingTick(dt){
+    if(!ready){displayFly();return;}
+    clockRemainder+=dt;
+    while(clockRemainder>=50&&running&&ready){
+      clockRemainder-=50;elapsed+=50;bot.step();
+      for(const state of held.values()){if(state.action==='left'||state.action==='right'){state.age+=50;while(state.age>=state.next){control(state.action);state.next+=65;}}}
+      human.tick(50,touchSoft||[...held.values()].some(s=>s.action==='soft'));
+      if(!human.alive){finish('human-topout');break;}if(!fly.alive){finish('fly-topout');break;}
+      if(elapsed>=settings.durationMs){finish('time');break;}
+      if(!bot.ready){clockRemainder=0;think();}
+    }
+    if(running){displayHuman();displayFly(dt);$('match-clock').textContent=clock(settings.durationMs-elapsed);}
+  }
   function tick(now){
     const dt=Math.min(250,Math.max(0,now-last));last=now;
     if(opened&&running&&!paused&&!document.hidden){
+      if(falling){fallingTick(dt);requestAnimationFrame(tick);return;}
       const activeDt=Math.min(dt,settings.durationMs-elapsed);elapsed+=activeDt;
       if(animation&&ready){
         const scaled=activeDt*animation.frames[0].duration/settings.flyMs;animation.advance(scaled);

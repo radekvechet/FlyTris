@@ -37,10 +37,16 @@ GPU, full connectome download or new training. Local scores use SQLite in
 - Easy, Medium and Hard ranked matches last three minutes. Leaderboards show
   human and fly scores over 24 hours, seven days, 30 days and all time.
 
-**Current opponent:** the bundled browser fly still uses its original placement
-controller. The newer falling-rules training pipeline supports legal timed
-control routes but has not yet been integrated into the browser opponent.
-The current versus match therefore uses different action rules for each player.
+**Current opponent:** the site uses the saved falling-rules checkpoint after 63
+generations. It moves and rotates through the same falling engine as the human,
+with a control every 50 ms; both clocks pause while its worker plans. Ranked
+presets use equal gravity for both sides.
+
+The planned six-hour training run stopped at 3.19 hours on a Windows file lock.
+A separate fresh evaluation measured **190.8 → 280.1 lines/game** over 24 paired
+games (eight independent sequences, three speeds). The 95% paired interval
+includes zero and some sequences regress. See [evaluation details](site-data/FALLING_RESULTS.md).
+The main replay uses recorded controls from this evaluated checkpoint.
 
 ## Train locally
 
@@ -96,7 +102,7 @@ includes final before/after tests and may finish early once evaluation completes
 Progress and results are in `runs/falling_overnight/MORNING_REPORT.md`.
 `STOP_TRAINING.cmd` pauses the Windows run; starting the launcher again resumes
 its remaining budget. On any platform, create a `STOP` file in the run directory.
-Checkpoints do not automatically replace the live game model.
+Future checkpoints do not automatically replace the released model.
 See [FALLING_TRAINING.md](FALLING_TRAINING.md) for the full protocol and limitations.
 
 ## Deploy
@@ -138,8 +144,8 @@ node --test tests/test_replay.cjs
 
 Physics tests and a successful training run establish that the implementation
 runs. Learning claims require held-out comparisons; validation improvements alone
-are insufficient. The existing snapshot reports placement-rule experiments,
-not results from the newer falling-rule trainer.
+are insufficient. Historical placement measurements and the newer falling-rule evaluation are
+reported separately.
 
 ## Publishing on GitLab or GitHub
 

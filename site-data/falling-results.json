@@ -1,0 +1,744 @@
+{
+  "task": "falling-v1",
+  "modelId": "4768ce0f1410449416212b0b37a7fe36bb215f0bdbaa8ce2ea57d339e6286888",
+  "generation": 63,
+  "trainingSeconds": 11484.325,
+  "trainingStatus": "failed",
+  "interruption": "Windows denied an atomic checkpoint rename; the six-hour budget was not completed.",
+  "evaluatedAt": "2026-09-14T11:29:16.678Z",
+  "summary": {
+    "beforeMean": 190.83333333333334,
+    "afterMean": 280.125,
+    "pairedGain": 89.29166666666666,
+    "paired95CI": [
+      -45.000000000000014,
+      205.70833333333331
+    ],
+    "independentSeeds": 8,
+    "pairs": 24
+  },
+  "baselineValidation": 134.66666666666666,
+  "bestValidation": 332.3333333333333,
+  "pairs": [
+    {
+      "before": {
+        "seed": 7000000,
+        "gravityMs": 800,
+        "lines": 35,
+        "pieces": 129,
+        "fitness": 35.0129,
+        "elapsedMs": 26450,
+        "capped": false,
+        "alive": false,
+        "decisions": 129,
+        "rotations": 91,
+        "midairSlides": 0,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000000,
+        "gravityMs": 800,
+        "lines": 327,
+        "pieces": 830,
+        "fitness": 327.083,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 830,
+        "rotations": 649,
+        "midairSlides": 1,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000000,
+        "gravityMs": 500,
+        "lines": 35,
+        "pieces": 129,
+        "fitness": 35.0129,
+        "elapsedMs": 26450,
+        "capped": false,
+        "alive": false,
+        "decisions": 129,
+        "rotations": 91,
+        "midairSlides": 0,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000000,
+        "gravityMs": 500,
+        "lines": 327,
+        "pieces": 830,
+        "fitness": 327.083,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 830,
+        "rotations": 649,
+        "midairSlides": 1,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000000,
+        "gravityMs": 250,
+        "lines": 35,
+        "pieces": 129,
+        "fitness": 35.0129,
+        "elapsedMs": 26450,
+        "capped": false,
+        "alive": false,
+        "decisions": 129,
+        "rotations": 91,
+        "midairSlides": 0,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000000,
+        "gravityMs": 250,
+        "lines": 327,
+        "pieces": 830,
+        "fitness": 327.083,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 830,
+        "rotations": 649,
+        "midairSlides": 3,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000001,
+        "gravityMs": 800,
+        "lines": 125,
+        "pieces": 354,
+        "fitness": 125.0354,
+        "elapsedMs": 73150,
+        "capped": false,
+        "alive": false,
+        "decisions": 354,
+        "rotations": 247,
+        "midairSlides": 1,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000001,
+        "gravityMs": 800,
+        "lines": 331,
+        "pieces": 843,
+        "fitness": 331.0843,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 843,
+        "rotations": 607,
+        "midairSlides": 2,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000001,
+        "gravityMs": 500,
+        "lines": 125,
+        "pieces": 354,
+        "fitness": 125.0354,
+        "elapsedMs": 73150,
+        "capped": false,
+        "alive": false,
+        "decisions": 354,
+        "rotations": 247,
+        "midairSlides": 1,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000001,
+        "gravityMs": 500,
+        "lines": 331,
+        "pieces": 843,
+        "fitness": 331.0843,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 843,
+        "rotations": 607,
+        "midairSlides": 2,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000001,
+        "gravityMs": 250,
+        "lines": 125,
+        "pieces": 354,
+        "fitness": 125.0354,
+        "elapsedMs": 73150,
+        "capped": false,
+        "alive": false,
+        "decisions": 354,
+        "rotations": 247,
+        "midairSlides": 1,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000001,
+        "gravityMs": 250,
+        "lines": 331,
+        "pieces": 843,
+        "fitness": 331.0843,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 843,
+        "rotations": 607,
+        "midairSlides": 5,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000002,
+        "gravityMs": 800,
+        "lines": 172,
+        "pieces": 472,
+        "fitness": 172.0472,
+        "elapsedMs": 100300,
+        "capped": false,
+        "alive": false,
+        "decisions": 472,
+        "rotations": 373,
+        "midairSlides": 1,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000002,
+        "gravityMs": 800,
+        "lines": 338,
+        "pieces": 847,
+        "fitness": 338.0847,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 847,
+        "rotations": 616,
+        "midairSlides": 2,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000002,
+        "gravityMs": 500,
+        "lines": 172,
+        "pieces": 472,
+        "fitness": 172.0472,
+        "elapsedMs": 100300,
+        "capped": false,
+        "alive": false,
+        "decisions": 472,
+        "rotations": 373,
+        "midairSlides": 1,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000002,
+        "gravityMs": 500,
+        "lines": 338,
+        "pieces": 847,
+        "fitness": 338.0847,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 847,
+        "rotations": 616,
+        "midairSlides": 2,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000002,
+        "gravityMs": 250,
+        "lines": 172,
+        "pieces": 472,
+        "fitness": 172.0472,
+        "elapsedMs": 100350,
+        "capped": false,
+        "alive": false,
+        "decisions": 472,
+        "rotations": 375,
+        "midairSlides": 2,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000002,
+        "gravityMs": 250,
+        "lines": 338,
+        "pieces": 847,
+        "fitness": 338.0847,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 847,
+        "rotations": 616,
+        "midairSlides": 2,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000003,
+        "gravityMs": 800,
+        "lines": 326,
+        "pieces": 850,
+        "fitness": 326.085,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 850,
+        "rotations": 631,
+        "midairSlides": 6,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000003,
+        "gravityMs": 800,
+        "lines": 133,
+        "pieces": 374,
+        "fitness": 133.0374,
+        "elapsedMs": 77950,
+        "capped": false,
+        "alive": false,
+        "decisions": 374,
+        "rotations": 277,
+        "midairSlides": 5,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000003,
+        "gravityMs": 500,
+        "lines": 326,
+        "pieces": 850,
+        "fitness": 326.085,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 850,
+        "rotations": 631,
+        "midairSlides": 6,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000003,
+        "gravityMs": 500,
+        "lines": 133,
+        "pieces": 374,
+        "fitness": 133.0374,
+        "elapsedMs": 77950,
+        "capped": false,
+        "alive": false,
+        "decisions": 374,
+        "rotations": 277,
+        "midairSlides": 5,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000003,
+        "gravityMs": 250,
+        "lines": 315,
+        "pieces": 828,
+        "fitness": 315.0828,
+        "elapsedMs": 175650,
+        "capped": false,
+        "alive": false,
+        "decisions": 828,
+        "rotations": 615,
+        "midairSlides": 7,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000003,
+        "gravityMs": 250,
+        "lines": 133,
+        "pieces": 374,
+        "fitness": 133.0374,
+        "elapsedMs": 77950,
+        "capped": false,
+        "alive": false,
+        "decisions": 374,
+        "rotations": 277,
+        "midairSlides": 5,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000004,
+        "gravityMs": 800,
+        "lines": 193,
+        "pieces": 522,
+        "fitness": 193.0522,
+        "elapsedMs": 111200,
+        "capped": false,
+        "alive": false,
+        "decisions": 522,
+        "rotations": 413,
+        "midairSlides": 3,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000004,
+        "gravityMs": 800,
+        "lines": 327,
+        "pieces": 835,
+        "fitness": 327.0835,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 835,
+        "rotations": 646,
+        "midairSlides": 8,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000004,
+        "gravityMs": 500,
+        "lines": 193,
+        "pieces": 522,
+        "fitness": 193.0522,
+        "elapsedMs": 111200,
+        "capped": false,
+        "alive": false,
+        "decisions": 522,
+        "rotations": 413,
+        "midairSlides": 3,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000004,
+        "gravityMs": 500,
+        "lines": 327,
+        "pieces": 835,
+        "fitness": 327.0835,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 835,
+        "rotations": 646,
+        "midairSlides": 8,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000004,
+        "gravityMs": 250,
+        "lines": 193,
+        "pieces": 522,
+        "fitness": 193.0522,
+        "elapsedMs": 111200,
+        "capped": false,
+        "alive": false,
+        "decisions": 522,
+        "rotations": 413,
+        "midairSlides": 3,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000004,
+        "gravityMs": 250,
+        "lines": 327,
+        "pieces": 835,
+        "fitness": 327.0835,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 835,
+        "rotations": 646,
+        "midairSlides": 8,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000005,
+        "gravityMs": 800,
+        "lines": 328,
+        "pieces": 841,
+        "fitness": 328.0841,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 841,
+        "rotations": 628,
+        "midairSlides": 4,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000005,
+        "gravityMs": 800,
+        "lines": 116,
+        "pieces": 330,
+        "fitness": 116.033,
+        "elapsedMs": 68500,
+        "capped": false,
+        "alive": false,
+        "decisions": 330,
+        "rotations": 231,
+        "midairSlides": 0,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000005,
+        "gravityMs": 500,
+        "lines": 328,
+        "pieces": 841,
+        "fitness": 328.0841,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 841,
+        "rotations": 628,
+        "midairSlides": 4,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000005,
+        "gravityMs": 500,
+        "lines": 116,
+        "pieces": 330,
+        "fitness": 116.033,
+        "elapsedMs": 68500,
+        "capped": false,
+        "alive": false,
+        "decisions": 330,
+        "rotations": 231,
+        "midairSlides": 0,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000005,
+        "gravityMs": 250,
+        "lines": 328,
+        "pieces": 841,
+        "fitness": 328.0841,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 841,
+        "rotations": 628,
+        "midairSlides": 4,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000005,
+        "gravityMs": 250,
+        "lines": 116,
+        "pieces": 330,
+        "fitness": 116.033,
+        "elapsedMs": 68500,
+        "capped": false,
+        "alive": false,
+        "decisions": 330,
+        "rotations": 231,
+        "midairSlides": 0,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000006,
+        "gravityMs": 800,
+        "lines": 79,
+        "pieces": 237,
+        "fitness": 79.0237,
+        "elapsedMs": 48000,
+        "capped": false,
+        "alive": false,
+        "decisions": 237,
+        "rotations": 171,
+        "midairSlides": 1,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000006,
+        "gravityMs": 800,
+        "lines": 337,
+        "pieces": 849,
+        "fitness": 337.0849,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 849,
+        "rotations": 628,
+        "midairSlides": 1,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000006,
+        "gravityMs": 500,
+        "lines": 79,
+        "pieces": 237,
+        "fitness": 79.0237,
+        "elapsedMs": 48000,
+        "capped": false,
+        "alive": false,
+        "decisions": 237,
+        "rotations": 171,
+        "midairSlides": 1,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000006,
+        "gravityMs": 500,
+        "lines": 337,
+        "pieces": 849,
+        "fitness": 337.0849,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 849,
+        "rotations": 628,
+        "midairSlides": 1,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000006,
+        "gravityMs": 250,
+        "lines": 79,
+        "pieces": 237,
+        "fitness": 79.0237,
+        "elapsedMs": 48000,
+        "capped": false,
+        "alive": false,
+        "decisions": 237,
+        "rotations": 171,
+        "midairSlides": 1,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000006,
+        "gravityMs": 250,
+        "lines": 337,
+        "pieces": 849,
+        "fitness": 337.0849,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 849,
+        "rotations": 628,
+        "midairSlides": 1,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000007,
+        "gravityMs": 800,
+        "lines": 279,
+        "pieces": 734,
+        "fitness": 279.0734,
+        "elapsedMs": 150450,
+        "capped": false,
+        "alive": false,
+        "decisions": 734,
+        "rotations": 531,
+        "midairSlides": 5,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000007,
+        "gravityMs": 800,
+        "lines": 332,
+        "pieces": 840,
+        "fitness": 332.084,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 840,
+        "rotations": 620,
+        "midairSlides": 2,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000007,
+        "gravityMs": 500,
+        "lines": 279,
+        "pieces": 734,
+        "fitness": 279.0734,
+        "elapsedMs": 150450,
+        "capped": false,
+        "alive": false,
+        "decisions": 734,
+        "rotations": 531,
+        "midairSlides": 5,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000007,
+        "gravityMs": 500,
+        "lines": 332,
+        "pieces": 840,
+        "fitness": 332.084,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 840,
+        "rotations": 620,
+        "midairSlides": 2,
+        "rules": "falling-v1"
+      }
+    },
+    {
+      "before": {
+        "seed": 7000007,
+        "gravityMs": 250,
+        "lines": 259,
+        "pieces": 688,
+        "fitness": 259.0688,
+        "elapsedMs": 141400,
+        "capped": false,
+        "alive": false,
+        "decisions": 688,
+        "rotations": 494,
+        "midairSlides": 5,
+        "rules": "falling-v1"
+      },
+      "after": {
+        "seed": 7000007,
+        "gravityMs": 250,
+        "lines": 332,
+        "pieces": 840,
+        "fitness": 332.084,
+        "elapsedMs": 180000,
+        "capped": false,
+        "alive": true,
+        "decisions": 840,
+        "rotations": 620,
+        "midairSlides": 2,
+        "rules": "falling-v1"
+      }
+    }
+  ]
+}

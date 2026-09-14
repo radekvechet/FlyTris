@@ -63,9 +63,18 @@ Keep the machine powered on. The Python wrapper prevents automatic idle sleep
 while training, but cannot prevent shutdown or a manually requested sleep.
 
 These outputs use `falling-v1` and are kept separate from old placement training.
-The current dashboard opponent still uses its previous placement controller.
-New weights are **not automatically deployed**; they must be integrated with
-the falling controller before use in the live game. Existing placement replay
+The dashboard now uses the evaluated checkpoint from the interrupted 3.19-hour
+run. New weights are **not automatically deployed**. To evaluate and integrate
+a future checkpoint, run:
+
+```sh
+node scripts/evaluate-falling.cjs --run runs/falling_overnight --out runs/falling_release
+node scripts/integrate-falling.cjs runs/falling_release
+node scripts/build.cjs
+```
+
+Use a fresh evaluation directory for different weights. The evaluation freezes
+inputs and resumes completed test games. Inspect the results before promoting. Existing placement replay
 and export commands reject falling checkpoints to avoid mixing the rules.
 
 The earlier two-lane placement experiment remains available with

@@ -76,9 +76,10 @@ Recurrence removal does not consistently reduce performance in these runs. The e
     page = page.replace('<p class="intro">A tiny player at the controls.</p>', '<p class="intro">A tiny player at the controls.</p><button id="versus-open" class="primary">Play against the fly ↗</button>')
     page = page.replace('__THREE_LICENSE__',(web/'third_party/THREE-LICENSE.txt').read_text(encoding='utf-8'))
     page = page.replace('__SHAPES__',json.dumps({name:[s.tolist() for s in variants] for name,variants in zip(NAMES,ROTATIONS)}))
-    for marker,name in [('__STYLE__','style.css'),('__TIMELINE__','replay.js'),('__SCENE__','scene.js'),('__BOOT__','boot.js'),('__THREE_LIB__','third_party/three.cjs'),('__VERSUS_STYLE__','versus.css'),('__VERSUS_CORE__','versus-core.js'),('__VERSUS_UI__','versus.js'),('__SCORES_UI__','scores.js'),('__SCORES_HTML__','scores.html'),('__SCORES_STYLE__','scores.css')]:
+    for marker,name in [('__FALLING_POLICY__','falling-policy.cjs'),('__FALLING_LIVE__','falling-live.js'),('__STYLE__','style.css'),('__TIMELINE__','replay.js'),('__SCENE__','scene.js'),('__BOOT__','boot.js'),('__THREE_LIB__','third_party/three.cjs'),('__VERSUS_STYLE__','versus.css'),('__VERSUS_CORE__','versus-core.js'),('__VERSUS_UI__','versus.js'),('__SCORES_UI__','scores.js'),('__SCORES_HTML__','scores.html'),('__SCORES_STYLE__','scores.css')]:
         page = page.replace(marker,(web/name).read_text(encoding='utf-8').replace('</script','<\\/script'))
     page = page.replace('__NEURONS__',str(d['model']['neurons'])).replace('__EDGES__',str(d['model']['edges']))
+    page = page.replace('__FALLING_SUMMARY__','')
     page = page.replace('__STATUS__','Learning observed in every replicate' if all_pass else 'Learning evidence needs review')
     if not ((ROOT/'runs/benchmark.json').exists() and (ROOT/'runs/benchmark_gpu.json').exists()):
         page = page.replace(' · <a href="MEASUREMENTS.md">Hardware and scaling</a>','')

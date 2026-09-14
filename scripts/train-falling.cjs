@@ -3,7 +3,7 @@ const {Worker}=require('node:worker_threads');
 const args=process.argv.slice(2),get=(key,fallback)=>{const i=args.indexOf('--'+key);return i<0?fallback:args[i+1];};
 const out=path.resolve(get('out','runs/falling_overnight')),hours=Number(get('hours',6)),workers=Number(get('workers',4)),smoke=args.includes('--smoke'),resume=args.includes('--resume');
 const input=path.join(out,'input'),sessionFile=path.join(out,'session.json'),stopFile=path.join(out,'STOP'),lockFile=path.join(out,'trainer.lock');
-function write(file,value){const temp=file+'.tmp';fs.writeFileSync(temp,typeof value==='string'?value:JSON.stringify(value,null,2));fs.renameSync(temp,file);}
+const write=require('./atomic-write.cjs');
 const norm=a=>{const n=Math.hypot(...a)||1;return a.map(v=>v/n);};
 const mean=a=>a.reduce((n,v)=>n+v,0)/a.length;
 function random(state){let x=state.rng>>>0;x^=x<<13;x^=x>>>17;x^=x<<5;state.rng=x>>>0;return (state.rng+.5)/4294967296;}
@@ -106,7 +106,7 @@ async function main(){
       state.tests=[];for(let j=0;j<cfg.testGames;j++)if(state.testBefore[j]&&state.testAfter[j])state.tests.push({before:state.testBefore[j],after:state.testAfter[j]});
     }});
     await pool.batch(tasks,deadline,save,stopped);state.status=stopped()?'paused':state.tests.length===cfg.testGames?'complete':'deadline_reached';save();report();log(`${state.status}: ${state.tests.length}/${cfg.testGames} held-out pairs. See MORNING_REPORT.md.`);
-  }catch(error){if(state){state.status='failed';state.error=error.stack;write(sessionFile,state);}throw error;}
+  }catch(error){if(state){state.status='failed';state.error=error.stack;write(sessionFile,state);const reportFile=path.join(out,'MORNING_REPORT.md');if(fs.existsSync(reportFile))write(reportFile,fs.readFileSync(reportFile,'utf8').replace(/Status: \*\*[^*]+\*\*/, 'Status: **failed**')+'\nTraining stopped: '+error.message+'\n');}throw error;}
   finally{if(timer)clearInterval(timer);if(pool)await pool.close();if(fs.existsSync(lockFile))fs.unlinkSync(lockFile);}
 }
 main().catch(e=>{console.error(e.stack);process.exitCode=1;});
