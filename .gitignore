@@ -1,0 +1,61 @@
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Downloaded connectome, caches and upstream code; retain provenance in Git
+/data/*
+!/data/source.json
+/vendor/
+
+# Training outputs and generated distributions (share selected runs as releases)
+/runs/
+/dist/
+/build/
+*.zip
+*.log
+*.tmp
+*.part
+
+# Node dependencies and generated site; site-data/ is deliberately committed
+node_modules/
+/public/
+/coverage/
+/.vercel/
+
+# Local scores, credentials and deployment secrets
+/.local/
+.env
+.env.*
+!.env.example
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Personal editor, agent and operating-system files
+/.tools/
+/.codex/
+/.agents/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~

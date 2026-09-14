@@ -1,0 +1,26 @@
+{
+  "repository": "https://github.com/eonsystemspbc/fly-brain",
+  "commit": "a3db62f9436074e485c0278290c2164ed6150808",
+  "files": {
+    "data/2025_Completeness_783.csv": {
+      "url": "https://raw.githubusercontent.com/eonsystemspbc/fly-brain/a3db62f9436074e485c0278290c2164ed6150808/data/2025_Completeness_783.csv",
+      "sha256": "52b0ac6094cd32c546f8d4c341e094376f48f4e791f8db9b166de5dff8199ea4",
+      "bytes": 3465987
+    },
+    "data/2025_Connectivity_783.parquet": {
+      "url": "https://raw.githubusercontent.com/eonsystemspbc/fly-brain/a3db62f9436074e485c0278290c2164ed6150808/data/2025_Connectivity_783.parquet",
+      "sha256": "efeb23fb99098e9c390f6869969b2a121a2ee92c833cfc45ecb2c1d8e1af0347",
+      "bytes": 100804642
+    },
+    "vendor/run_pytorch.py": {
+      "url": "https://raw.githubusercontent.com/eonsystemspbc/fly-brain/a3db62f9436074e485c0278290c2164ed6150808/code/run_pytorch.py",
+      "sha256": "699655db7a56045271ba467268be153d0a3318d4cc4cecc0a13f33e69ce79667",
+      "bytes": 22859
+    },
+    "vendor/LICENSE": {
+      "url": "https://raw.githubusercontent.com/eonsystemspbc/fly-brain/a3db62f9436074e485c0278290c2164ed6150808/LICENSE",
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "bytes": 18092
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "flytris-arena", "version": "1.0.0", "private": true,
+  "license": "GPL-2.0-or-later",
+  "engines": {"node": "24.x"},
+  "scripts": {"build": "node scripts/deploy-build.cjs", "dev": "node scripts/dev.cjs", "db:migrate": "node scripts/migrate.cjs", "snapshot": "node scripts/snapshot.cjs", "test:server": "node --test tests/test_scores.cjs"},
+  "dependencies": {"@neondatabase/serverless": "1.0.2"}
+}

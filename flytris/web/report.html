@@ -1,0 +1,25 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FlyTris · a fly at the controls</title><style>__STYLE__</style><style>__VERSUS_STYLE__</style><style>__SCORES_STYLE__</style></head>
+<body><main>
+<header><div><div class="eyebrow"><span class="status-dot"></span> CONNECTOME LAB / EXPERIMENT 01</div><h1>FlyTris<span class="title-dot">.</span></h1><p class="intro">A tiny player at the controls.</p></div><div class="header-meta"><span class="badge">__STATUS__</span><p>__NEURONS__ neurons · __EDGES__ connections<br>8 learned output weights</p></div></header>
+<section class="replay-card" aria-label="Interactive fly replay">
+<div class="stage-heading"><span><span class="live-dot" id="live-dot"></span><strong id="play-status">READY TO PLAY</strong></span><span class="stage-hint">Drag to look around <button id="reset-view" aria-label="Reset camera view">↺</button></span></div>
+<div class="replay-stage"><div id="fly-stage"><div id="scene-error" hidden>3D rendering is unavailable. The recorded Tetris replay still works on the board alongside.</div><div class="scene-caption"><span class="scene-number">01 /</span><span>THE WIRED PLAYER<small>Six legs. Six connections. One game.</small></span></div></div>
+<aside class="board-panel"><div class="board-heading"><span>LIVE BOARD</span><span id="piece-label">—</span></div><canvas id="board" width="260" height="520" aria-label="Tetris replay board"></canvas><div class="score-row"><div><strong id="line-count">0</strong><small>LINES CLEARED</small></div><div><strong id="piece-count">0</strong><small>PIECES PLACED</small></div></div><p id="action-label">Press play to meet the player.</p><div id="clear-message" aria-live="polite"></div></aside></div>
+<div class="transport"><div class="transport-buttons"><button id="play" class="primary">▶ <span>Play replay</span></button><button id="step" class="secondary" title="Animate one placement">Next move</button></div><div class="scrubber"><label for="scrub"><span>REPLAY POSITION</span><span id="counter">0 / 0</span></label><input id="scrub" aria-label="Replay position" type="range" min="0" value="0"></div><label class="speed-label">SPEED<select id="speed" aria-label="Replay speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label></div>
+<div class="replay-footnote"><span><i class="wire-key"></i> Leg taps illustrate the saved rotation, column and drop.</span><span>A little head shake for every cleared row.</span></div>
+</section>
+__SCORES_HTML__
+<div class="results-layout"><section class="card"><div class="section-eyebrow">THE MEASUREMENTS</div><h2>Learning, measured.</h2><div class="table-scroll"><table><thead><tr><th>Run</th><th>Before</th><th>After</th><th>Gain [95% CI]</th><th>Training</th></tr></thead><tbody>__TABLE__</tbody></table></div><p>Mean lines cleared on identical, unseen piece sequences. This replay is the first held-out game from the first training run.</p><div class="stats"><div><strong>__RAW__</strong><small>Trained raw-feature control</small></div><div><strong>__RANDOM__</strong><small>Random placements</small></div></div></section>
+<section class="card explanation"><div class="section-eyebrow">UNDER THE SHELL</div><h2>What actually learns?</h2><p>Board features enter a fixed fly-derived spiking circuit. Eight learned output weights choose a placement from its activity.</p><p class="note">The fly animation illustrates recorded decisions. It is not a biomechanical simulation. Removing recurrent connections did not consistently hurt performance in these trials, so fly wiring has not been shown to be essential.</p><nav><a href="REPORT.md">Protocol ↗</a> · <a href="MEASUREMENTS.md">Hardware and scaling</a> · <a href="results.json">Raw results ↗</a></nav></section></div>
+<footer>FLYTRIS / LOCAL RESEARCH PLAYGROUND<span>Recorded policy. Real connectome data.</span></footer>
+</main>
+__VERSUS_HTML__
+<!-- Bundled Three.js license:
+__THREE_LICENSE__
+-->
+<script>(function(){const exports={};__THREE_LIB__;window.THREE=exports;})();</script>
+<script>__TIMELINE__</script><script>__SCENE__</script>
+<script>window.FLYTRIS_DATA=__DATA__;window.FLYTRIS_SHAPES=__SHAPES__;</script><script>__BOOT__</script>
+<script>window.FLYTRIS_MODEL=__VERSUS_MODEL__;</script><script id="versus-core">__VERSUS_CORE__</script><script>__SCORES_UI__</script><script>__VERSUS_UI__</script>
+</body></html>

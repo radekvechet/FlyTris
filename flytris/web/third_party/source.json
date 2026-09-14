@@ -1,0 +1,10 @@
+{
+  "three.cjs": {
+    "url": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.cjs",
+    "sha256": "46b8578a4596f539fcf349a8a7b98b68be8197833d2f18da6f8ecff788f6537e"
+  },
+  "THREE-LICENSE.txt": {
+    "url": "https://cdn.jsdelivr.net/npm/three@0.185.0/LICENSE",
+    "sha256": "8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc"
+  }
+}

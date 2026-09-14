@@ -1,0 +1,4 @@
+# Optional, only for the exact upstream full-brain benchmark.
+# Install with: pip install -r requirements-gpu.txt
+--extra-index-url https://download.pytorch.org/whl/cu124
+torch==2.6.0+cu124

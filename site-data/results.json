@@ -1,0 +1,2523 @@
+{
+  "hardware": {
+    "platform": "Windows-10-10.0.26100-SP0",
+    "cpu": "Intel64 Family 6 Model 158 Stepping 12, GenuineIntel",
+    "logical_cpus": 8,
+    "ram_gib": 31.92,
+    "gpu": "NVIDIA GeForce GTX 1660, 6144 MiB, 4508 MiB, 610.47",
+    "python": "3.11.0"
+  },
+  "model": {
+    "kind": "normalized_lif_fly_reservoir",
+    "neurons": 256,
+    "edges": 9089,
+    "steps": 16,
+    "encoder_seed": 42,
+    "mode": "fly",
+    "recurrent_gain": 0.45,
+    "graph_sha256": "bd6941998214ba578191ce26870d672286418050f289138dc171c0c2675abd42",
+    "trainable_parameters": 8,
+    "input_features": 8,
+    "state_reset": "each_candidate",
+    "biological_fidelity": "Task-adapted dynamics; not the canonical Shiu/Eon model."
+  },
+  "protocol": {
+    "training_seeds": [
+      11,
+      22,
+      33
+    ],
+    "held_out_seeds": [
+      90000,
+      90001,
+      90002,
+      90003,
+      90004,
+      90005,
+      90006,
+      90007,
+      90008,
+      90009,
+      90010,
+      90011,
+      90012,
+      90013,
+      90014,
+      90015,
+      90016,
+      90017,
+      90018,
+      90019,
+      90020,
+      90021,
+      90022,
+      90023
+    ],
+    "generations": 12,
+    "population": 16,
+    "games_per_candidate": 2,
+    "training_piece_cap": 100,
+    "test_piece_cap": 300,
+    "fitness": "lines + 0.02 * pieces",
+    "selection": "validation seeds 50000..50003 only",
+    "test_policy": "greedy, no learning during evaluation"
+  },
+  "replicates": [
+    {
+      "training_seed": 11,
+      "summary": {
+        "games": 24,
+        "before_mean_lines": 0.125,
+        "after_mean_lines": 40.708333333333336,
+        "before_median_lines": 0.0,
+        "after_median_lines": 36.0,
+        "mean_line_improvement": 40.583333333333336,
+        "paired_bootstrap_95_ci": [
+          33.333333333333336,
+          48.625
+        ],
+        "wins": 24,
+        "ties": 0,
+        "losses": 0,
+        "after_capped_games": 0,
+        "learning_evidence": true
+      },
+      "before": [
+        {
+          "seed": 90000,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90001,
+          "lines": 1,
+          "pieces": 26,
+          "capped": false,
+          "fitness": 1.52
+        },
+        {
+          "seed": 90002,
+          "lines": 0,
+          "pieces": 20,
+          "capped": false,
+          "fitness": 0.4
+        },
+        {
+          "seed": 90003,
+          "lines": 0,
+          "pieces": 22,
+          "capped": false,
+          "fitness": 0.44
+        },
+        {
+          "seed": 90004,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90005,
+          "lines": 0,
+          "pieces": 21,
+          "capped": false,
+          "fitness": 0.42
+        },
+        {
+          "seed": 90006,
+          "lines": 1,
+          "pieces": 26,
+          "capped": false,
+          "fitness": 1.52
+        },
+        {
+          "seed": 90007,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90008,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90009,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90010,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90011,
+          "lines": 0,
+          "pieces": 22,
+          "capped": false,
+          "fitness": 0.44
+        },
+        {
+          "seed": 90012,
+          "lines": 0,
+          "pieces": 25,
+          "capped": false,
+          "fitness": 0.5
+        },
+        {
+          "seed": 90013,
+          "lines": 0,
+          "pieces": 26,
+          "capped": false,
+          "fitness": 0.52
+        },
+        {
+          "seed": 90014,
+          "lines": 0,
+          "pieces": 26,
+          "capped": false,
+          "fitness": 0.52
+        },
+        {
+          "seed": 90015,
+          "lines": 0,
+          "pieces": 25,
+          "capped": false,
+          "fitness": 0.5
+        },
+        {
+          "seed": 90016,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90017,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90018,
+          "lines": 1,
+          "pieces": 26,
+          "capped": false,
+          "fitness": 1.52
+        },
+        {
+          "seed": 90019,
+          "lines": 0,
+          "pieces": 21,
+          "capped": false,
+          "fitness": 0.42
+        },
+        {
+          "seed": 90020,
+          "lines": 0,
+          "pieces": 21,
+          "capped": false,
+          "fitness": 0.42
+        },
+        {
+          "seed": 90021,
+          "lines": 0,
+          "pieces": 25,
+          "capped": false,
+          "fitness": 0.5
+        },
+        {
+          "seed": 90022,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90023,
+          "lines": 0,
+          "pieces": 25,
+          "capped": false,
+          "fitness": 0.5
+        }
+      ],
+      "after": [
+        {
+          "seed": 90000,
+          "lines": 15,
+          "pieces": 79,
+          "capped": false,
+          "fitness": 16.58
+        },
+        {
+          "seed": 90001,
+          "lines": 38,
+          "pieces": 137,
+          "capped": false,
+          "fitness": 40.74
+        },
+        {
+          "seed": 90002,
+          "lines": 69,
+          "pieces": 213,
+          "capped": false,
+          "fitness": 73.26
+        },
+        {
+          "seed": 90003,
+          "lines": 14,
+          "pieces": 75,
+          "capped": false,
+          "fitness": 15.5
+        },
+        {
+          "seed": 90004,
+          "lines": 45,
+          "pieces": 153,
+          "capped": false,
+          "fitness": 48.06
+        },
+        {
+          "seed": 90005,
+          "lines": 45,
+          "pieces": 153,
+          "capped": false,
+          "fitness": 48.06
+        },
+        {
+          "seed": 90006,
+          "lines": 26,
+          "pieces": 106,
+          "capped": false,
+          "fitness": 28.12
+        },
+        {
+          "seed": 90007,
+          "lines": 58,
+          "pieces": 187,
+          "capped": false,
+          "fitness": 61.74
+        },
+        {
+          "seed": 90008,
+          "lines": 42,
+          "pieces": 147,
+          "capped": false,
+          "fitness": 44.94
+        },
+        {
+          "seed": 90009,
+          "lines": 33,
+          "pieces": 124,
+          "capped": false,
+          "fitness": 35.48
+        },
+        {
+          "seed": 90010,
+          "lines": 34,
+          "pieces": 124,
+          "capped": false,
+          "fitness": 36.48
+        },
+        {
+          "seed": 90011,
+          "lines": 38,
+          "pieces": 135,
+          "capped": false,
+          "fitness": 40.7
+        },
+        {
+          "seed": 90012,
+          "lines": 98,
+          "pieces": 286,
+          "capped": false,
+          "fitness": 103.72
+        },
+        {
+          "seed": 90013,
+          "lines": 67,
+          "pieces": 209,
+          "capped": false,
+          "fitness": 71.18
+        },
+        {
+          "seed": 90014,
+          "lines": 34,
+          "pieces": 126,
+          "capped": false,
+          "fitness": 36.52
+        },
+        {
+          "seed": 90015,
+          "lines": 55,
+          "pieces": 179,
+          "capped": false,
+          "fitness": 58.58
+        },
+        {
+          "seed": 90016,
+          "lines": 24,
+          "pieces": 102,
+          "capped": false,
+          "fitness": 26.04
+        },
+        {
+          "seed": 90017,
+          "lines": 16,
+          "pieces": 80,
+          "capped": false,
+          "fitness": 17.6
+        },
+        {
+          "seed": 90018,
+          "lines": 31,
+          "pieces": 119,
+          "capped": false,
+          "fitness": 33.38
+        },
+        {
+          "seed": 90019,
+          "lines": 33,
+          "pieces": 126,
+          "capped": false,
+          "fitness": 35.52
+        },
+        {
+          "seed": 90020,
+          "lines": 34,
+          "pieces": 127,
+          "capped": false,
+          "fitness": 36.54
+        },
+        {
+          "seed": 90021,
+          "lines": 31,
+          "pieces": 117,
+          "capped": false,
+          "fitness": 33.34
+        },
+        {
+          "seed": 90022,
+          "lines": 55,
+          "pieces": 179,
+          "capped": false,
+          "fitness": 58.58
+        },
+        {
+          "seed": 90023,
+          "lines": 42,
+          "pieces": 144,
+          "capped": false,
+          "fitness": 44.88
+        }
+      ],
+      "silenced": [
+        {
+          "seed": 90000,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90001,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90002,
+          "lines": 0,
+          "pieces": 29,
+          "capped": false,
+          "fitness": 0.58
+        },
+        {
+          "seed": 90003,
+          "lines": 0,
+          "pieces": 26,
+          "capped": false,
+          "fitness": 0.52
+        },
+        {
+          "seed": 90004,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90005,
+          "lines": 1,
+          "pieces": 31,
+          "capped": false,
+          "fitness": 1.62
+        },
+        {
+          "seed": 90006,
+          "lines": 0,
+          "pieces": 25,
+          "capped": false,
+          "fitness": 0.5
+        },
+        {
+          "seed": 90007,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90008,
+          "lines": 0,
+          "pieces": 25,
+          "capped": false,
+          "fitness": 0.5
+        },
+        {
+          "seed": 90009,
+          "lines": 0,
+          "pieces": 20,
+          "capped": false,
+          "fitness": 0.4
+        },
+        {
+          "seed": 90010,
+          "lines": 0,
+          "pieces": 22,
+          "capped": false,
+          "fitness": 0.44
+        },
+        {
+          "seed": 90011,
+          "lines": 2,
+          "pieces": 28,
+          "capped": false,
+          "fitness": 2.56
+        },
+        {
+          "seed": 90012,
+          "lines": 0,
+          "pieces": 18,
+          "capped": false,
+          "fitness": 0.36
+        },
+        {
+          "seed": 90013,
+          "lines": 0,
+          "pieces": 22,
+          "capped": false,
+          "fitness": 0.44
+        },
+        {
+          "seed": 90014,
+          "lines": 0,
+          "pieces": 33,
+          "capped": false,
+          "fitness": 0.66
+        },
+        {
+          "seed": 90015,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90016,
+          "lines": 0,
+          "pieces": 21,
+          "capped": false,
+          "fitness": 0.42
+        },
+        {
+          "seed": 90017,
+          "lines": 0,
+          "pieces": 25,
+          "capped": false,
+          "fitness": 0.5
+        },
+        {
+          "seed": 90018,
+          "lines": 0,
+          "pieces": 21,
+          "capped": false,
+          "fitness": 0.42
+        },
+        {
+          "seed": 90019,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90020,
+          "lines": 0,
+          "pieces": 21,
+          "capped": false,
+          "fitness": 0.42
+        },
+        {
+          "seed": 90021,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90022,
+          "lines": 0,
+          "pieces": 14,
+          "capped": false,
+          "fitness": 0.28
+        },
+        {
+          "seed": 90023,
+          "lines": 1,
+          "pieces": 16,
+          "capped": false,
+          "fitness": 1.32
+        }
+      ],
+      "disconnected": [
+        {
+          "seed": 90000,
+          "lines": 44,
+          "pieces": 152,
+          "capped": false,
+          "fitness": 47.04
+        },
+        {
+          "seed": 90001,
+          "lines": 92,
+          "pieces": 272,
+          "capped": false,
+          "fitness": 97.44
+        },
+        {
+          "seed": 90002,
+          "lines": 34,
+          "pieces": 125,
+          "capped": false,
+          "fitness": 36.5
+        },
+        {
+          "seed": 90003,
+          "lines": 70,
+          "pieces": 215,
+          "capped": false,
+          "fitness": 74.3
+        },
+        {
+          "seed": 90004,
+          "lines": 53,
+          "pieces": 175,
+          "capped": false,
+          "fitness": 56.5
+        },
+        {
+          "seed": 90005,
+          "lines": 64,
+          "pieces": 202,
+          "capped": false,
+          "fitness": 68.04
+        },
+        {
+          "seed": 90006,
+          "lines": 40,
+          "pieces": 142,
+          "capped": false,
+          "fitness": 42.84
+        },
+        {
+          "seed": 90007,
+          "lines": 36,
+          "pieces": 132,
+          "capped": false,
+          "fitness": 38.64
+        },
+        {
+          "seed": 90008,
+          "lines": 28,
+          "pieces": 112,
+          "capped": false,
+          "fitness": 30.240000000000002
+        },
+        {
+          "seed": 90009,
+          "lines": 45,
+          "pieces": 157,
+          "capped": false,
+          "fitness": 48.14
+        },
+        {
+          "seed": 90010,
+          "lines": 76,
+          "pieces": 232,
+          "capped": false,
+          "fitness": 80.64
+        },
+        {
+          "seed": 90011,
+          "lines": 42,
+          "pieces": 145,
+          "capped": false,
+          "fitness": 44.9
+        },
+        {
+          "seed": 90012,
+          "lines": 60,
+          "pieces": 192,
+          "capped": false,
+          "fitness": 63.84
+        },
+        {
+          "seed": 90013,
+          "lines": 33,
+          "pieces": 125,
+          "capped": false,
+          "fitness": 35.5
+        },
+        {
+          "seed": 90014,
+          "lines": 50,
+          "pieces": 166,
+          "capped": false,
+          "fitness": 53.32
+        },
+        {
+          "seed": 90015,
+          "lines": 44,
+          "pieces": 149,
+          "capped": false,
+          "fitness": 46.98
+        },
+        {
+          "seed": 90016,
+          "lines": 20,
+          "pieces": 91,
+          "capped": false,
+          "fitness": 21.82
+        },
+        {
+          "seed": 90017,
+          "lines": 48,
+          "pieces": 162,
+          "capped": false,
+          "fitness": 51.24
+        },
+        {
+          "seed": 90018,
+          "lines": 24,
+          "pieces": 103,
+          "capped": false,
+          "fitness": 26.06
+        },
+        {
+          "seed": 90019,
+          "lines": 78,
+          "pieces": 234,
+          "capped": false,
+          "fitness": 82.68
+        },
+        {
+          "seed": 90020,
+          "lines": 37,
+          "pieces": 132,
+          "capped": false,
+          "fitness": 39.64
+        },
+        {
+          "seed": 90021,
+          "lines": 36,
+          "pieces": 131,
+          "capped": false,
+          "fitness": 38.62
+        },
+        {
+          "seed": 90022,
+          "lines": 68,
+          "pieces": 211,
+          "capped": false,
+          "fitness": 72.22
+        },
+        {
+          "seed": 90023,
+          "lines": 53,
+          "pieces": 172,
+          "capped": false,
+          "fitness": 56.44
+        }
+      ],
+      "train_seconds": 65.63379089999944,
+      "training_placements": 30531
+    },
+    {
+      "training_seed": 22,
+      "summary": {
+        "games": 24,
+        "before_mean_lines": 7.458333333333333,
+        "after_mean_lines": 103.83333333333333,
+        "before_median_lines": 6.0,
+        "after_median_lines": 111.0,
+        "mean_line_improvement": 96.375,
+        "paired_bootstrap_95_ci": [
+          86.74895833333333,
+          103.875
+        ],
+        "wins": 24,
+        "ties": 0,
+        "losses": 0,
+        "after_capped_games": 20,
+        "learning_evidence": true
+      },
+      "before": [
+        {
+          "seed": 90000,
+          "lines": 4,
+          "pieces": 48,
+          "capped": false,
+          "fitness": 4.96
+        },
+        {
+          "seed": 90001,
+          "lines": 12,
+          "pieces": 68,
+          "capped": false,
+          "fitness": 13.36
+        },
+        {
+          "seed": 90002,
+          "lines": 2,
+          "pieces": 42,
+          "capped": false,
+          "fitness": 2.84
+        },
+        {
+          "seed": 90003,
+          "lines": 6,
+          "pieces": 54,
+          "capped": false,
+          "fitness": 7.08
+        },
+        {
+          "seed": 90004,
+          "lines": 15,
+          "pieces": 77,
+          "capped": false,
+          "fitness": 16.54
+        },
+        {
+          "seed": 90005,
+          "lines": 10,
+          "pieces": 64,
+          "capped": false,
+          "fitness": 11.28
+        },
+        {
+          "seed": 90006,
+          "lines": 7,
+          "pieces": 56,
+          "capped": false,
+          "fitness": 8.120000000000001
+        },
+        {
+          "seed": 90007,
+          "lines": 5,
+          "pieces": 51,
+          "capped": false,
+          "fitness": 6.02
+        },
+        {
+          "seed": 90008,
+          "lines": 5,
+          "pieces": 51,
+          "capped": false,
+          "fitness": 6.02
+        },
+        {
+          "seed": 90009,
+          "lines": 10,
+          "pieces": 64,
+          "capped": false,
+          "fitness": 11.28
+        },
+        {
+          "seed": 90010,
+          "lines": 11,
+          "pieces": 66,
+          "capped": false,
+          "fitness": 12.32
+        },
+        {
+          "seed": 90011,
+          "lines": 7,
+          "pieces": 54,
+          "capped": false,
+          "fitness": 8.08
+        },
+        {
+          "seed": 90012,
+          "lines": 6,
+          "pieces": 54,
+          "capped": false,
+          "fitness": 7.08
+        },
+        {
+          "seed": 90013,
+          "lines": 14,
+          "pieces": 74,
+          "capped": false,
+          "fitness": 15.48
+        },
+        {
+          "seed": 90014,
+          "lines": 11,
+          "pieces": 65,
+          "capped": false,
+          "fitness": 12.3
+        },
+        {
+          "seed": 90015,
+          "lines": 11,
+          "pieces": 67,
+          "capped": false,
+          "fitness": 12.34
+        },
+        {
+          "seed": 90016,
+          "lines": 5,
+          "pieces": 49,
+          "capped": false,
+          "fitness": 5.98
+        },
+        {
+          "seed": 90017,
+          "lines": 2,
+          "pieces": 43,
+          "capped": false,
+          "fitness": 2.86
+        },
+        {
+          "seed": 90018,
+          "lines": 3,
+          "pieces": 43,
+          "capped": false,
+          "fitness": 3.86
+        },
+        {
+          "seed": 90019,
+          "lines": 5,
+          "pieces": 51,
+          "capped": false,
+          "fitness": 6.02
+        },
+        {
+          "seed": 90020,
+          "lines": 12,
+          "pieces": 68,
+          "capped": false,
+          "fitness": 13.36
+        },
+        {
+          "seed": 90021,
+          "lines": 6,
+          "pieces": 53,
+          "capped": false,
+          "fitness": 7.0600000000000005
+        },
+        {
+          "seed": 90022,
+          "lines": 5,
+          "pieces": 52,
+          "capped": false,
+          "fitness": 6.04
+        },
+        {
+          "seed": 90023,
+          "lines": 5,
+          "pieces": 49,
+          "capped": false,
+          "fitness": 5.98
+        }
+      ],
+      "after": [
+        {
+          "seed": 90000,
+          "lines": 109,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 115.0
+        },
+        {
+          "seed": 90001,
+          "lines": 111,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 117.0
+        },
+        {
+          "seed": 90002,
+          "lines": 115,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 121.0
+        },
+        {
+          "seed": 90003,
+          "lines": 111,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 117.0
+        },
+        {
+          "seed": 90004,
+          "lines": 106,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 112.0
+        },
+        {
+          "seed": 90005,
+          "lines": 113,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 119.0
+        },
+        {
+          "seed": 90006,
+          "lines": 116,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 122.0
+        },
+        {
+          "seed": 90007,
+          "lines": 105,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 111.0
+        },
+        {
+          "seed": 90008,
+          "lines": 89,
+          "pieces": 265,
+          "capped": false,
+          "fitness": 94.3
+        },
+        {
+          "seed": 90009,
+          "lines": 116,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 122.0
+        },
+        {
+          "seed": 90010,
+          "lines": 105,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 111.0
+        },
+        {
+          "seed": 90011,
+          "lines": 115,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 121.0
+        },
+        {
+          "seed": 90012,
+          "lines": 116,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 122.0
+        },
+        {
+          "seed": 90013,
+          "lines": 109,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 115.0
+        },
+        {
+          "seed": 90014,
+          "lines": 111,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 117.0
+        },
+        {
+          "seed": 90015,
+          "lines": 113,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 119.0
+        },
+        {
+          "seed": 90016,
+          "lines": 40,
+          "pieces": 143,
+          "capped": false,
+          "fitness": 42.86
+        },
+        {
+          "seed": 90017,
+          "lines": 111,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 117.0
+        },
+        {
+          "seed": 90018,
+          "lines": 111,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 117.0
+        },
+        {
+          "seed": 90019,
+          "lines": 27,
+          "pieces": 110,
+          "capped": false,
+          "fitness": 29.2
+        },
+        {
+          "seed": 90020,
+          "lines": 119,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 125.0
+        },
+        {
+          "seed": 90021,
+          "lines": 111,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 117.0
+        },
+        {
+          "seed": 90022,
+          "lines": 95,
+          "pieces": 280,
+          "capped": false,
+          "fitness": 100.6
+        },
+        {
+          "seed": 90023,
+          "lines": 118,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 124.0
+        }
+      ],
+      "silenced": [
+        {
+          "seed": 90000,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90001,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90002,
+          "lines": 0,
+          "pieces": 29,
+          "capped": false,
+          "fitness": 0.58
+        },
+        {
+          "seed": 90003,
+          "lines": 0,
+          "pieces": 26,
+          "capped": false,
+          "fitness": 0.52
+        },
+        {
+          "seed": 90004,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90005,
+          "lines": 1,
+          "pieces": 31,
+          "capped": false,
+          "fitness": 1.62
+        },
+        {
+          "seed": 90006,
+          "lines": 0,
+          "pieces": 25,
+          "capped": false,
+          "fitness": 0.5
+        },
+        {
+          "seed": 90007,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90008,
+          "lines": 0,
+          "pieces": 25,
+          "capped": false,
+          "fitness": 0.5
+        },
+        {
+          "seed": 90009,
+          "lines": 0,
+          "pieces": 20,
+          "capped": false,
+          "fitness": 0.4
+        },
+        {
+          "seed": 90010,
+          "lines": 0,
+          "pieces": 22,
+          "capped": false,
+          "fitness": 0.44
+        },
+        {
+          "seed": 90011,
+          "lines": 2,
+          "pieces": 28,
+          "capped": false,
+          "fitness": 2.56
+        },
+        {
+          "seed": 90012,
+          "lines": 0,
+          "pieces": 18,
+          "capped": false,
+          "fitness": 0.36
+        },
+        {
+          "seed": 90013,
+          "lines": 0,
+          "pieces": 22,
+          "capped": false,
+          "fitness": 0.44
+        },
+        {
+          "seed": 90014,
+          "lines": 0,
+          "pieces": 33,
+          "capped": false,
+          "fitness": 0.66
+        },
+        {
+          "seed": 90015,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90016,
+          "lines": 0,
+          "pieces": 21,
+          "capped": false,
+          "fitness": 0.42
+        },
+        {
+          "seed": 90017,
+          "lines": 0,
+          "pieces": 25,
+          "capped": false,
+          "fitness": 0.5
+        },
+        {
+          "seed": 90018,
+          "lines": 0,
+          "pieces": 21,
+          "capped": false,
+          "fitness": 0.42
+        },
+        {
+          "seed": 90019,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90020,
+          "lines": 0,
+          "pieces": 21,
+          "capped": false,
+          "fitness": 0.42
+        },
+        {
+          "seed": 90021,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90022,
+          "lines": 0,
+          "pieces": 14,
+          "capped": false,
+          "fitness": 0.28
+        },
+        {
+          "seed": 90023,
+          "lines": 1,
+          "pieces": 16,
+          "capped": false,
+          "fitness": 1.32
+        }
+      ],
+      "disconnected": [
+        {
+          "seed": 90000,
+          "lines": 109,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 115.0
+        },
+        {
+          "seed": 90001,
+          "lines": 109,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 115.0
+        },
+        {
+          "seed": 90002,
+          "lines": 106,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 112.0
+        },
+        {
+          "seed": 90003,
+          "lines": 59,
+          "pieces": 190,
+          "capped": false,
+          "fitness": 62.8
+        },
+        {
+          "seed": 90004,
+          "lines": 116,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 122.0
+        },
+        {
+          "seed": 90005,
+          "lines": 106,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 112.0
+        },
+        {
+          "seed": 90006,
+          "lines": 110,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 116.0
+        },
+        {
+          "seed": 90007,
+          "lines": 106,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 112.0
+        },
+        {
+          "seed": 90008,
+          "lines": 56,
+          "pieces": 182,
+          "capped": false,
+          "fitness": 59.64
+        },
+        {
+          "seed": 90009,
+          "lines": 106,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 112.0
+        },
+        {
+          "seed": 90010,
+          "lines": 110,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 116.0
+        },
+        {
+          "seed": 90011,
+          "lines": 109,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 115.0
+        },
+        {
+          "seed": 90012,
+          "lines": 118,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 124.0
+        },
+        {
+          "seed": 90013,
+          "lines": 79,
+          "pieces": 239,
+          "capped": false,
+          "fitness": 83.78
+        },
+        {
+          "seed": 90014,
+          "lines": 105,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 111.0
+        },
+        {
+          "seed": 90015,
+          "lines": 114,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 120.0
+        },
+        {
+          "seed": 90016,
+          "lines": 110,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 116.0
+        },
+        {
+          "seed": 90017,
+          "lines": 101,
+          "pieces": 295,
+          "capped": false,
+          "fitness": 106.9
+        },
+        {
+          "seed": 90018,
+          "lines": 113,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 119.0
+        },
+        {
+          "seed": 90019,
+          "lines": 97,
+          "pieces": 285,
+          "capped": false,
+          "fitness": 102.7
+        },
+        {
+          "seed": 90020,
+          "lines": 111,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 117.0
+        },
+        {
+          "seed": 90021,
+          "lines": 114,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 120.0
+        },
+        {
+          "seed": 90022,
+          "lines": 61,
+          "pieces": 196,
+          "capped": false,
+          "fitness": 64.92
+        },
+        {
+          "seed": 90023,
+          "lines": 105,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 111.0
+        }
+      ],
+      "train_seconds": 84.80596929986496,
+      "training_placements": 38744
+    },
+    {
+      "training_seed": 33,
+      "summary": {
+        "games": 24,
+        "before_mean_lines": 0.08333333333333333,
+        "after_mean_lines": 68.58333333333333,
+        "before_median_lines": 0.0,
+        "after_median_lines": 67.5,
+        "mean_line_improvement": 68.5,
+        "paired_bootstrap_95_ci": [
+          58.331250000000004,
+          78.5
+        ],
+        "wins": 24,
+        "ties": 0,
+        "losses": 0,
+        "after_capped_games": 4,
+        "learning_evidence": true
+      },
+      "before": [
+        {
+          "seed": 90000,
+          "lines": 0,
+          "pieces": 20,
+          "capped": false,
+          "fitness": 0.4
+        },
+        {
+          "seed": 90001,
+          "lines": 0,
+          "pieces": 22,
+          "capped": false,
+          "fitness": 0.44
+        },
+        {
+          "seed": 90002,
+          "lines": 0,
+          "pieces": 21,
+          "capped": false,
+          "fitness": 0.42
+        },
+        {
+          "seed": 90003,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90004,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90005,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90006,
+          "lines": 0,
+          "pieces": 25,
+          "capped": false,
+          "fitness": 0.5
+        },
+        {
+          "seed": 90007,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90008,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90009,
+          "lines": 0,
+          "pieces": 22,
+          "capped": false,
+          "fitness": 0.44
+        },
+        {
+          "seed": 90010,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90011,
+          "lines": 0,
+          "pieces": 22,
+          "capped": false,
+          "fitness": 0.44
+        },
+        {
+          "seed": 90012,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90013,
+          "lines": 0,
+          "pieces": 25,
+          "capped": false,
+          "fitness": 0.5
+        },
+        {
+          "seed": 90014,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90015,
+          "lines": 0,
+          "pieces": 25,
+          "capped": false,
+          "fitness": 0.5
+        },
+        {
+          "seed": 90016,
+          "lines": 1,
+          "pieces": 27,
+          "capped": false,
+          "fitness": 1.54
+        },
+        {
+          "seed": 90017,
+          "lines": 0,
+          "pieces": 25,
+          "capped": false,
+          "fitness": 0.5
+        },
+        {
+          "seed": 90018,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90019,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90020,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90021,
+          "lines": 0,
+          "pieces": 22,
+          "capped": false,
+          "fitness": 0.44
+        },
+        {
+          "seed": 90022,
+          "lines": 1,
+          "pieces": 25,
+          "capped": false,
+          "fitness": 1.5
+        },
+        {
+          "seed": 90023,
+          "lines": 0,
+          "pieces": 25,
+          "capped": false,
+          "fitness": 0.5
+        }
+      ],
+      "after": [
+        {
+          "seed": 90000,
+          "lines": 105,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 111.0
+        },
+        {
+          "seed": 90001,
+          "lines": 21,
+          "pieces": 95,
+          "capped": false,
+          "fitness": 22.9
+        },
+        {
+          "seed": 90002,
+          "lines": 72,
+          "pieces": 223,
+          "capped": false,
+          "fitness": 76.46
+        },
+        {
+          "seed": 90003,
+          "lines": 43,
+          "pieces": 150,
+          "capped": false,
+          "fitness": 46.0
+        },
+        {
+          "seed": 90004,
+          "lines": 107,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 113.0
+        },
+        {
+          "seed": 90005,
+          "lines": 108,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 114.0
+        },
+        {
+          "seed": 90006,
+          "lines": 84,
+          "pieces": 253,
+          "capped": false,
+          "fitness": 89.06
+        },
+        {
+          "seed": 90007,
+          "lines": 58,
+          "pieces": 187,
+          "capped": false,
+          "fitness": 61.74
+        },
+        {
+          "seed": 90008,
+          "lines": 63,
+          "pieces": 199,
+          "capped": false,
+          "fitness": 66.98
+        },
+        {
+          "seed": 90009,
+          "lines": 50,
+          "pieces": 167,
+          "capped": false,
+          "fitness": 53.34
+        },
+        {
+          "seed": 90010,
+          "lines": 95,
+          "pieces": 280,
+          "capped": false,
+          "fitness": 100.6
+        },
+        {
+          "seed": 90011,
+          "lines": 79,
+          "pieces": 238,
+          "capped": false,
+          "fitness": 83.76
+        },
+        {
+          "seed": 90012,
+          "lines": 53,
+          "pieces": 174,
+          "capped": false,
+          "fitness": 56.48
+        },
+        {
+          "seed": 90013,
+          "lines": 73,
+          "pieces": 223,
+          "capped": false,
+          "fitness": 77.46
+        },
+        {
+          "seed": 90014,
+          "lines": 80,
+          "pieces": 242,
+          "capped": false,
+          "fitness": 84.84
+        },
+        {
+          "seed": 90015,
+          "lines": 94,
+          "pieces": 277,
+          "capped": false,
+          "fitness": 99.54
+        },
+        {
+          "seed": 90016,
+          "lines": 53,
+          "pieces": 174,
+          "capped": false,
+          "fitness": 56.48
+        },
+        {
+          "seed": 90017,
+          "lines": 78,
+          "pieces": 235,
+          "capped": false,
+          "fitness": 82.7
+        },
+        {
+          "seed": 90018,
+          "lines": 57,
+          "pieces": 185,
+          "capped": false,
+          "fitness": 60.7
+        },
+        {
+          "seed": 90019,
+          "lines": 49,
+          "pieces": 164,
+          "capped": false,
+          "fitness": 52.28
+        },
+        {
+          "seed": 90020,
+          "lines": 40,
+          "pieces": 143,
+          "capped": false,
+          "fitness": 42.86
+        },
+        {
+          "seed": 90021,
+          "lines": 104,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 110.0
+        },
+        {
+          "seed": 90022,
+          "lines": 54,
+          "pieces": 178,
+          "capped": false,
+          "fitness": 57.56
+        },
+        {
+          "seed": 90023,
+          "lines": 26,
+          "pieces": 109,
+          "capped": false,
+          "fitness": 28.18
+        }
+      ],
+      "silenced": [
+        {
+          "seed": 90000,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90001,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90002,
+          "lines": 0,
+          "pieces": 29,
+          "capped": false,
+          "fitness": 0.58
+        },
+        {
+          "seed": 90003,
+          "lines": 0,
+          "pieces": 26,
+          "capped": false,
+          "fitness": 0.52
+        },
+        {
+          "seed": 90004,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90005,
+          "lines": 1,
+          "pieces": 31,
+          "capped": false,
+          "fitness": 1.62
+        },
+        {
+          "seed": 90006,
+          "lines": 0,
+          "pieces": 25,
+          "capped": false,
+          "fitness": 0.5
+        },
+        {
+          "seed": 90007,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90008,
+          "lines": 0,
+          "pieces": 25,
+          "capped": false,
+          "fitness": 0.5
+        },
+        {
+          "seed": 90009,
+          "lines": 0,
+          "pieces": 20,
+          "capped": false,
+          "fitness": 0.4
+        },
+        {
+          "seed": 90010,
+          "lines": 0,
+          "pieces": 22,
+          "capped": false,
+          "fitness": 0.44
+        },
+        {
+          "seed": 90011,
+          "lines": 2,
+          "pieces": 28,
+          "capped": false,
+          "fitness": 2.56
+        },
+        {
+          "seed": 90012,
+          "lines": 0,
+          "pieces": 18,
+          "capped": false,
+          "fitness": 0.36
+        },
+        {
+          "seed": 90013,
+          "lines": 0,
+          "pieces": 22,
+          "capped": false,
+          "fitness": 0.44
+        },
+        {
+          "seed": 90014,
+          "lines": 0,
+          "pieces": 33,
+          "capped": false,
+          "fitness": 0.66
+        },
+        {
+          "seed": 90015,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90016,
+          "lines": 0,
+          "pieces": 21,
+          "capped": false,
+          "fitness": 0.42
+        },
+        {
+          "seed": 90017,
+          "lines": 0,
+          "pieces": 25,
+          "capped": false,
+          "fitness": 0.5
+        },
+        {
+          "seed": 90018,
+          "lines": 0,
+          "pieces": 21,
+          "capped": false,
+          "fitness": 0.42
+        },
+        {
+          "seed": 90019,
+          "lines": 0,
+          "pieces": 24,
+          "capped": false,
+          "fitness": 0.48
+        },
+        {
+          "seed": 90020,
+          "lines": 0,
+          "pieces": 21,
+          "capped": false,
+          "fitness": 0.42
+        },
+        {
+          "seed": 90021,
+          "lines": 0,
+          "pieces": 23,
+          "capped": false,
+          "fitness": 0.46
+        },
+        {
+          "seed": 90022,
+          "lines": 0,
+          "pieces": 14,
+          "capped": false,
+          "fitness": 0.28
+        },
+        {
+          "seed": 90023,
+          "lines": 1,
+          "pieces": 16,
+          "capped": false,
+          "fitness": 1.32
+        }
+      ],
+      "disconnected": [
+        {
+          "seed": 90000,
+          "lines": 32,
+          "pieces": 122,
+          "capped": false,
+          "fitness": 34.44
+        },
+        {
+          "seed": 90001,
+          "lines": 112,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 118.0
+        },
+        {
+          "seed": 90002,
+          "lines": 105,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 111.0
+        },
+        {
+          "seed": 90003,
+          "lines": 58,
+          "pieces": 187,
+          "capped": false,
+          "fitness": 61.74
+        },
+        {
+          "seed": 90004,
+          "lines": 73,
+          "pieces": 225,
+          "capped": false,
+          "fitness": 77.5
+        },
+        {
+          "seed": 90005,
+          "lines": 37,
+          "pieces": 133,
+          "capped": false,
+          "fitness": 39.66
+        },
+        {
+          "seed": 90006,
+          "lines": 107,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 113.0
+        },
+        {
+          "seed": 90007,
+          "lines": 91,
+          "pieces": 268,
+          "capped": false,
+          "fitness": 96.36
+        },
+        {
+          "seed": 90008,
+          "lines": 22,
+          "pieces": 98,
+          "capped": false,
+          "fitness": 23.96
+        },
+        {
+          "seed": 90009,
+          "lines": 36,
+          "pieces": 133,
+          "capped": false,
+          "fitness": 38.66
+        },
+        {
+          "seed": 90010,
+          "lines": 83,
+          "pieces": 249,
+          "capped": false,
+          "fitness": 87.98
+        },
+        {
+          "seed": 90011,
+          "lines": 105,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 111.0
+        },
+        {
+          "seed": 90012,
+          "lines": 101,
+          "pieces": 295,
+          "capped": false,
+          "fitness": 106.9
+        },
+        {
+          "seed": 90013,
+          "lines": 71,
+          "pieces": 219,
+          "capped": false,
+          "fitness": 75.38
+        },
+        {
+          "seed": 90014,
+          "lines": 34,
+          "pieces": 127,
+          "capped": false,
+          "fitness": 36.54
+        },
+        {
+          "seed": 90015,
+          "lines": 72,
+          "pieces": 221,
+          "capped": false,
+          "fitness": 76.42
+        },
+        {
+          "seed": 90016,
+          "lines": 50,
+          "pieces": 167,
+          "capped": false,
+          "fitness": 53.34
+        },
+        {
+          "seed": 90017,
+          "lines": 59,
+          "pieces": 191,
+          "capped": false,
+          "fitness": 62.82
+        },
+        {
+          "seed": 90018,
+          "lines": 37,
+          "pieces": 135,
+          "capped": false,
+          "fitness": 39.7
+        },
+        {
+          "seed": 90019,
+          "lines": 56,
+          "pieces": 183,
+          "capped": false,
+          "fitness": 59.66
+        },
+        {
+          "seed": 90020,
+          "lines": 80,
+          "pieces": 242,
+          "capped": false,
+          "fitness": 84.84
+        },
+        {
+          "seed": 90021,
+          "lines": 114,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 120.0
+        },
+        {
+          "seed": 90022,
+          "lines": 105,
+          "pieces": 300,
+          "capped": true,
+          "fitness": 111.0
+        },
+        {
+          "seed": 90023,
+          "lines": 95,
+          "pieces": 279,
+          "capped": false,
+          "fitness": 100.58
+        }
+      ],
+      "train_seconds": 80.76982240000507,
+      "training_placements": 37725
+    }
+  ],
+  "raw_control": [
+    {
+      "seed": 90000,
+      "lines": 38,
+      "pieces": 136,
+      "capped": false,
+      "fitness": 40.72
+    },
+    {
+      "seed": 90001,
+      "lines": 53,
+      "pieces": 173,
+      "capped": false,
+      "fitness": 56.46
+    },
+    {
+      "seed": 90002,
+      "lines": 38,
+      "pieces": 136,
+      "capped": false,
+      "fitness": 40.72
+    },
+    {
+      "seed": 90003,
+      "lines": 42,
+      "pieces": 147,
+      "capped": false,
+      "fitness": 44.94
+    },
+    {
+      "seed": 90004,
+      "lines": 26,
+      "pieces": 106,
+      "capped": false,
+      "fitness": 28.12
+    },
+    {
+      "seed": 90005,
+      "lines": 33,
+      "pieces": 121,
+      "capped": false,
+      "fitness": 35.42
+    },
+    {
+      "seed": 90006,
+      "lines": 33,
+      "pieces": 122,
+      "capped": false,
+      "fitness": 35.44
+    },
+    {
+      "seed": 90007,
+      "lines": 51,
+      "pieces": 169,
+      "capped": false,
+      "fitness": 54.38
+    },
+    {
+      "seed": 90008,
+      "lines": 17,
+      "pieces": 83,
+      "capped": false,
+      "fitness": 18.66
+    },
+    {
+      "seed": 90009,
+      "lines": 33,
+      "pieces": 123,
+      "capped": false,
+      "fitness": 35.46
+    },
+    {
+      "seed": 90010,
+      "lines": 46,
+      "pieces": 155,
+      "capped": false,
+      "fitness": 49.1
+    },
+    {
+      "seed": 90011,
+      "lines": 33,
+      "pieces": 124,
+      "capped": false,
+      "fitness": 35.48
+    },
+    {
+      "seed": 90012,
+      "lines": 34,
+      "pieces": 126,
+      "capped": false,
+      "fitness": 36.52
+    },
+    {
+      "seed": 90013,
+      "lines": 54,
+      "pieces": 176,
+      "capped": false,
+      "fitness": 57.52
+    },
+    {
+      "seed": 90014,
+      "lines": 68,
+      "pieces": 212,
+      "capped": false,
+      "fitness": 72.24
+    },
+    {
+      "seed": 90015,
+      "lines": 67,
+      "pieces": 207,
+      "capped": false,
+      "fitness": 71.14
+    },
+    {
+      "seed": 90016,
+      "lines": 35,
+      "pieces": 128,
+      "capped": false,
+      "fitness": 37.56
+    },
+    {
+      "seed": 90017,
+      "lines": 44,
+      "pieces": 151,
+      "capped": false,
+      "fitness": 47.02
+    },
+    {
+      "seed": 90018,
+      "lines": 48,
+      "pieces": 161,
+      "capped": false,
+      "fitness": 51.22
+    },
+    {
+      "seed": 90019,
+      "lines": 17,
+      "pieces": 83,
+      "capped": false,
+      "fitness": 18.66
+    },
+    {
+      "seed": 90020,
+      "lines": 48,
+      "pieces": 162,
+      "capped": false,
+      "fitness": 51.24
+    },
+    {
+      "seed": 90021,
+      "lines": 46,
+      "pieces": 157,
+      "capped": false,
+      "fitness": 49.14
+    },
+    {
+      "seed": 90022,
+      "lines": 63,
+      "pieces": 197,
+      "capped": false,
+      "fitness": 66.94
+    },
+    {
+      "seed": 90023,
+      "lines": 47,
+      "pieces": 159,
+      "capped": false,
+      "fitness": 50.18
+    }
+  ],
+  "random_control": [
+    {
+      "seed": 90000,
+      "lines": 0,
+      "pieces": 24,
+      "capped": false,
+      "fitness": 0.48
+    },
+    {
+      "seed": 90001,
+      "lines": 1,
+      "pieces": 30,
+      "capped": false,
+      "fitness": 1.6
+    },
+    {
+      "seed": 90002,
+      "lines": 0,
+      "pieces": 26,
+      "capped": false,
+      "fitness": 0.52
+    },
+    {
+      "seed": 90003,
+      "lines": 0,
+      "pieces": 26,
+      "capped": false,
+      "fitness": 0.52
+    },
+    {
+      "seed": 90004,
+      "lines": 0,
+      "pieces": 29,
+      "capped": false,
+      "fitness": 0.58
+    },
+    {
+      "seed": 90005,
+      "lines": 0,
+      "pieces": 24,
+      "capped": false,
+      "fitness": 0.48
+    },
+    {
+      "seed": 90006,
+      "lines": 0,
+      "pieces": 23,
+      "capped": false,
+      "fitness": 0.46
+    },
+    {
+      "seed": 90007,
+      "lines": 0,
+      "pieces": 24,
+      "capped": false,
+      "fitness": 0.48
+    },
+    {
+      "seed": 90008,
+      "lines": 0,
+      "pieces": 25,
+      "capped": false,
+      "fitness": 0.5
+    },
+    {
+      "seed": 90009,
+      "lines": 0,
+      "pieces": 22,
+      "capped": false,
+      "fitness": 0.44
+    },
+    {
+      "seed": 90010,
+      "lines": 0,
+      "pieces": 24,
+      "capped": false,
+      "fitness": 0.48
+    },
+    {
+      "seed": 90011,
+      "lines": 0,
+      "pieces": 28,
+      "capped": false,
+      "fitness": 0.56
+    },
+    {
+      "seed": 90012,
+      "lines": 0,
+      "pieces": 27,
+      "capped": false,
+      "fitness": 0.54
+    },
+    {
+      "seed": 90013,
+      "lines": 0,
+      "pieces": 27,
+      "capped": false,
+      "fitness": 0.54
+    },
+    {
+      "seed": 90014,
+      "lines": 0,
+      "pieces": 26,
+      "capped": false,
+      "fitness": 0.52
+    },
+    {
+      "seed": 90015,
+      "lines": 0,
+      "pieces": 28,
+      "capped": false,
+      "fitness": 0.56
+    },
+    {
+      "seed": 90016,
+      "lines": 0,
+      "pieces": 30,
+      "capped": false,
+      "fitness": 0.6
+    },
+    {
+      "seed": 90017,
+      "lines": 0,
+      "pieces": 28,
+      "capped": false,
+      "fitness": 0.56
+    },
+    {
+      "seed": 90018,
+      "lines": 0,
+      "pieces": 28,
+      "capped": false,
+      "fitness": 0.56
+    },
+    {
+      "seed": 90019,
+      "lines": 0,
+      "pieces": 23,
+      "capped": false,
+      "fitness": 0.46
+    },
+    {
+      "seed": 90020,
+      "lines": 0,
+      "pieces": 27,
+      "capped": false,
+      "fitness": 0.54
+    },
+    {
+      "seed": 90021,
+      "lines": 0,
+      "pieces": 24,
+      "capped": false,
+      "fitness": 0.48
+    },
+    {
+      "seed": 90022,
+      "lines": 0,
+      "pieces": 20,
+      "capped": false,
+      "fitness": 0.4
+    },
+    {
+      "seed": 90023,
+      "lines": 0,
+      "pieces": 21,
+      "capped": false,
+      "fitness": 0.42
+    }
+  ],
+  "raw_train_seconds": 26.018141500011552,
+  "elapsed_seconds": 326.1086615000386,
+  "limitations": [
+    "Simplified placement Tetris: no hold, kicks, tucks or real-time control.",
+    "Eight engineered board features; synthetic input mapping.",
+    "Small extracted subgraph with normalized LIF dynamics; not full biological brain training.",
+    "Only eight output weights learn. Internal fly synapses remain fixed.",
+    "Paired intervals are conditional on each trained model; no proof of fly-topology advantage.",
+    "Fixed-budget timing does not predict time to convergence."
+  ]
+}
