@@ -50,5 +50,5 @@
     requestAnimationFrame(animate);
   }
   window.FlyReport={scene,lcd,drawBoard,pause(){timeline.pause();scene?.invalidate();draw();},restore:draw};
-  draw();requestAnimationFrame(animate);
+  timeline.play();draw();requestAnimationFrame(animate);
 })();
