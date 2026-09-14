@@ -72,15 +72,25 @@
     }
     const buttons=[],buttonPositions=[[-.85,.62],[-.19,.62],[.70,.55],[-.52,1.02],[-.68,-.25],[.68,-.25]];
     const names=['LEFT','RIGHT','ROTATE','DROP','START','SOUND'];
+    const movementButtons=new Set([0,1,3]);
     buttonPositions.forEach(([x,z],i)=>{
       const b=mesh(new T.CylinderGeometry(i===2?.26:.15,i===2?.27:.165,.13,32),gold.clone(),device);
       b.position.set(x,.43,z);buttons.push(b);
+      if(movementButtons.has(i)){
+        // Solid arrow markings stay crisp at any zoom and move with the keycap.
+        const arrow=new T.Shape();
+        arrow.moveTo(-.105,-.028);arrow.lineTo(.012,-.028);arrow.lineTo(.012,-.085);
+        arrow.lineTo(.115,0);arrow.lineTo(.012,.085);arrow.lineTo(.012,.028);arrow.lineTo(-.105,.028);arrow.closePath();
+        const geometry=new T.ShapeGeometry(arrow);
+        geometry.rotateZ(i===0?Math.PI:i===3?-Math.PI/2:0);geometry.rotateX(-Math.PI/2);
+        const mark=mesh(geometry,new T.MeshBasicMaterial({color:0x101719}),b);mark.position.y=.068;mark.castShadow=false;
+      }
       const text=label(device,names[i],i===2?.64:.51,.17,[x,.39,z+.27],'#a7b1ac',38);text.rotation.x=-Math.PI/2;
     });
     const brand=label(device,'BRICK GAME',1.27,.3,[.12,.39,1.38],'#adb8ad',51);brand.rotation.x=-Math.PI/2;
     // Tiny metallic sockets make every cable attachment visible.
-    const endpoints=buttons.map(b=>device.localToWorld(b.position.clone().add(vec(0,.09,0))));
-    for(const p of endpoints){const plug=mesh(new T.SphereGeometry(.048,12,8),metal);plug.position.copy(p);}
+    const endpoints=buttons.map((b,i)=>device.localToWorld(b.position.clone().add(movementButtons.has(i)?vec(0,.055,-.145):vec(0,.09,0))));
+    endpoints.forEach((p,i)=>{if(movementButtons.has(i))return;const plug=mesh(new T.SphereGeometry(.048,12,8),metal);plug.position.copy(p);});
 
     // Anatomical silhouette: segmented abdomen, thorax, eyes, antennae, wings, six legs.
     const fly=new T.Group();fly.position.set(-2.05,.02,.35);fly.rotation.y=-Math.PI/2;scene.add(fly);
