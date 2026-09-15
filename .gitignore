@@ -27,7 +27,9 @@ htmlcov/
 
 # Node dependencies and generated site; site-data/ is deliberately committed
 node_modules/
-/public/
+/public/*
+!/public/favicon.ico
+!/public/fly-head.svg
 /coverage/
 /.vercel/
 

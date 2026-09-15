@@ -71,6 +71,8 @@ Recurrence removal does not consistently reduce performance in these runs. The e
     versus_model = export_model(checkpoint) if checkpoint.exists() else None
     if versus_model is not None:
         (out/'versus-model.json').write_text(json.dumps(versus_model),encoding='utf-8')
+    fly_icon = (ROOT/'public/fly-head.svg').read_text(encoding='utf-8').replace('<svg ','<svg class="play-fly-icon" aria-hidden="true" focusable="false" ').replace('fill="#000000"','fill="currentColor"')
+    page = page.replace('__FLY_HEAD_ICON__',fly_icon)
     page = page.replace('__GAME_CONFIG__',(ROOT/'game-config.json').read_text(encoding='utf-8'))
     page = page.replace('__VERSUS_MODEL__',json.dumps(versus_model))
     page = page.replace('__VERSUS_HTML__',(web/'versus.html').read_text(encoding='utf-8'))
@@ -137,6 +139,7 @@ def pack(out, include_data=False, run='runs/local'):
     files.extend((ROOT/'tests').glob('*.cjs'))
     for folder in ['app','server','db','scripts','site-data']:
         files.extend(p for p in (ROOT/folder).rglob('*') if p.is_file())
+    files.extend(ROOT/'public'/name for name in ['favicon.ico','fly-head.svg'])
     for name in ['game-config.json','package.json','package-lock.json','vercel.json','next.config.mjs','proxy.js','DEPLOYMENT.md','SECURITY.md','.env.example']:
         if (ROOT/name).exists(): files.append(ROOT/name)
     for name in ['README.md','EXPERIMENTS.md','OVERNIGHT.md','FALLING_TRAINING.md','RUN_OVERNIGHT.cmd','STOP_TRAINING.cmd','requirements.txt','requirements-gpu.txt','setup.ps1','setup.sh','NOTICE.md','LICENSE','.gitignore']:
