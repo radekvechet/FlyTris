@@ -1,7 +1,8 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const {localDatabase,migrate}=require('../server/db.cjs'),{makeRankedService}=require('../server/ranked.cjs'),verify=require('../server/verify.cjs');
 const pool=require('../site-data/ranked-pool.json'),model=require('../site-data/versus-model.json');
-async function fixture(difficulty='medium'){const db=localDatabase(':memory:');await migrate(db);let time=1000000;const service=makeRankedService(db,model.metadata.model_sha256,()=>time);const s=await service.start({difficulty,rulesVersion:6,modelHash:model.metadata.model_sha256});return {db,service,s,run:pool.runs.find(r=>r.id===s.flyRun.id),add:n=>time+=n};}
+async function fixture(difficulty='medium'){const db=localDatabase(':memory:');await migrate(db);let time=1000000;const service=makeRankedService(db,model.metadata.model_sha256,()=>time);const s=await service.start({difficulty,rulesVersion:config.rulesVersion,modelHash:model.metadata.model_sha256});return {db,service,s,run:pool.runs.find(r=>r.id===s.flyRun.id),add:n=>time+=n};}
+const config=require('../game-config.json');
 const credentials=s=>({id:s.id,token:s.token});
 test('saving a name returns its full 24-hour rank with difficulty and tie-break isolation',async()=>{
   const f=await fixture();try{
@@ -38,7 +39,7 @@ test('checkpoints compute both scores; invalid totals cannot be saved',async()=>
     assert.equal((await f.service.leaderboard('all')).summary.matches,0);
     const saved=await f.service.finish(credentials(f.s));assert.equal(saved.saved,true);
     await f.service.finish(credentials(f.s));assert.equal((await f.service.leaderboard('all')).summary.matches,1);
-    const [row]=await f.db.query('SELECT * FROM flytris_matches WHERE id=$1',[f.s.id]);assert.equal(row.fly_lines,receipt.fly.lines);assert.equal(row.human_pieces,receipt.human.pieces);assert.equal(row.elapsed_ms,state.elapsedMs);assert.equal(row.winner,'fly');assert.equal(row.rules_version,6);
+    const [row]=await f.db.query('SELECT * FROM flytris_matches WHERE id=$1',[f.s.id]);assert.equal(row.fly_lines,receipt.fly.lines);assert.equal(row.human_pieces,receipt.human.pieces);assert.equal(row.elapsed_ms,state.elapsedMs);assert.equal(row.winner,'fly');assert.equal(row.rules_version,config.rulesVersion);
   }finally{f.db.close();}
 });
 test('retries are idempotent; altered past batches, future clocks and fabricated finishes fail',async()=>{
@@ -89,12 +90,12 @@ test('configured fly cadence keeps human time and browser/server verification in
 });
 test('ranked cadence comes from the server and retired rules cannot start or enter rankings',async()=>{
   const f=await fixture();try{
-    assert.equal(f.s.settings.flyControlMs,200);
-    await assert.rejects(f.service.start({difficulty:'medium',rulesVersion:4,modelHash:model.metadata.model_sha256}),{status:409});
+    assert.equal(f.s.settings.flyControlMs,config.presets.medium.flyControlMs);
+    await assert.rejects(f.service.start({difficulty:'medium',rulesVersion:config.rulesVersion-1,modelHash:model.metadata.model_sha256}),{status:409});
     const {commands,state}=topout(f.run);f.add(state.elapsedMs);
     await f.service.checkpoint({...credentials(f.s),sequence:1,commands});
     await f.service.finish(credentials(f.s));
-    await f.db.query('UPDATE flytris_matches SET rules_version=4 WHERE id=$1',[f.s.id]);
+    await f.db.query('UPDATE flytris_matches SET rules_version=$1 WHERE id=$2',[config.rulesVersion-1,f.s.id]);
     assert.equal((await f.service.leaderboard('all')).summary.matches,0);
   }finally{f.db.close();}
 });
@@ -127,6 +128,6 @@ test('a full Medium game saves the slower fly score after all twelve checkpoints
     assert.equal(receipt.human.lines,human.lines);
     await f.service.finish({...credentials(f.s),result:{settings:{...f.s.settings,seed:f.s.seed},model:{model_sha256:model.metadata.model_sha256},reason:'time',elapsedSeconds:120,human:receipt.human,fly:receipt.fly}});
     const [row]=await f.db.query('SELECT fly_lines,rules_version FROM flytris_matches WHERE id=$1',[f.s.id]);
-    assert.equal(row.fly_lines,f.run.lines);assert.equal(row.rules_version,6);
+    assert.equal(row.fly_lines,f.run.lines);assert.equal(row.rules_version,config.rulesVersion);
   }finally{f.db.close();}
 });

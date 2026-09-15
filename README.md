@@ -41,12 +41,12 @@ GPU, full connectome download or new training. Local scores use SQLite in
 
 **Current opponent:** the site uses the saved falling-rules checkpoint after 63
 generations. It moves and rotates through the same falling engine as the human,
-with a control every 300 ms on Easy, 200 ms on Medium and 100 ms on Hard.
+with a control every 300 ms on Easy, 400 ms on Medium and 100 ms on Hard.
 The whole fly simulation slows with its control tick, including gravity and
 landing delay; human timing stays unchanged. Ranked games use one of nine
 precomputed fly runs and server verification every ten seconds; the server
 calculates both scores. Practice runs fresh inference in a browser worker.
-Current leaderboards use rules version 6; older scores are preserved separately.
+Current leaderboards use rules version 7; older scores are preserved separately.
 See [SECURITY.md](SECURITY.md) for the limits of anti-cheat verification.
 
 The planned six-hour training run stopped at 3.19 hours on a Windows file lock.

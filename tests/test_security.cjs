@@ -7,7 +7,7 @@ const modelHash=require('../site-data/versus-model.json').metadata.model_sha256;
 function request(method='GET',body,headers={}){const req=Readable.from(body===undefined?[]:[body]);Object.assign(req,{method,url:'/api/scores',headers:{host:'localhost:8765',origin:'http://localhost:8765','content-type':'application/json',...headers},socket:{remoteAddress:'127.0.0.1'}});return req;}
 function response(){return {headers:{},statusCode:200,setHeader(k,v){this.headers[k.toLowerCase()]=v;},end(body){this.body=body?JSON.parse(body):null;}};}
 async function call(handler,req){const res=response();await handler(req,res);return res;}
-const start=()=>JSON.stringify({action:'start',difficulty:'medium',rulesVersion:6,modelHash});
+const start=()=>JSON.stringify({action:'start',difficulty:'medium',rulesVersion:require('../game-config.json').rulesVersion,modelHash});
 test('exact production domain, subdomains and loopback origins only',()=>{
   for(const origin of ['https://flytris.net','https://www.flytris.net','https://a.b.flytris.net','http://localhost:8765','http://127.0.0.1:3000','http://[::1]:3000'])assert(allowedOrigin(origin),origin);
   for(const origin of [undefined,'null','https://evilflytris.net','https://flytris.net.evil.org','http://flytris.net','https://flytris.net:444','https://flytris.net/','https://flytris.net@evil.org','https://preview.vercel.app','http://localhost.evil.org'])assert(!allowedOrigin(origin),String(origin));
