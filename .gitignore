@@ -61,6 +61,7 @@ Desktop.ini
 *.swp
 *.swo
 *~
+skills-lock.json
 
 # Next.js build outputs
 /.next/

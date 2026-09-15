@@ -7,8 +7,8 @@
   let opened=false,running=false,paused=false,worker=null,requestId=0,human,fly,settings,elapsed=0,animation=null,move=null,committed=false,baseLines=0,basePieces=0,lastResult=null,ready=false;
   let bindings=structuredClone(V.defaultBindings),scoreSession=null,startAttempt=0;
   let rankedLog='',rankedSequence=0,rankedVerifiedMs=0,rankedWaiting=false,rankedControls=0,rankedHard=false;
-  const held=new Map(),cookieName='flytris_preferences_v2';let touchSoft=false;
-  function clearHeld(){held.clear();touchSoft=false;}
+  const held=new Map(),cookieName='flytris_preferences_v2';
+  function clearHeld(){held.clear();document.querySelectorAll('.touch-controls .pressed').forEach(b=>b.classList.remove('pressed'));}
   const keySymbols={ArrowLeft:'←',ArrowRight:'→',ArrowUp:'↑',ArrowDown:'↓',Space:'Space',Enter:'↵ Enter',Escape:'Esc',ShiftLeft:'⇧ Left',ShiftRight:'⇧ Right'};
   function keycaps(keys){
     const fragment=document.createDocumentFragment();
@@ -80,7 +80,7 @@
     $('match-status').textContent='CHOOSE YOUR PACE';$('seed-input').value=crypto.getRandomValues(new Uint32Array(1))[0];
     $('match-start').disabled=!model||K.missing(bindings).length>0;
     if(!model)$('match-error').textContent='This report has no exported trained model. Regenerate it with its original checkpoint available.';
-    $('match-clock').textContent=clock(Number($('match-length').value));$('human-pace').focus();
+    $('match-clock').textContent=clock(Number($('match-length').value));$('match-start').focus();
   }
   function open(){
     view.pause();opened=true;report.hidden=true;arena.hidden=false;document.body.classList.add('in-match');$('versus-scene-slot').appendChild(stage);
@@ -110,14 +110,14 @@
     if(falling&&bot){
       const s=bot.sample();view.drawBoard(flyCtx,s);view.drawBoard(view.lcd.getContext('2d'),s,true);
       view.scene?.update(s,dt,running&&!paused,matchMedia('(prefers-reduced-motion: reduce)').matches);
-      $('fly-lines').textContent=fly.lines;$('fly-pieces').textContent=fly.pieces;
+      $('opponent-lines').textContent=$('fly-lines').textContent=fly.lines;$('opponent-pieces').textContent=$('fly-pieces').textContent=fly.pieces;
       $('fly-action').textContent=running&&!ready?'Planning the next route · match clock waiting':s.action?`${s.action.piece} · ${s.action.control} · row ${s.action.y+1}`:'Ready to play';
       $('fly-clear').textContent=s.cleared?`+${s.cleared} ${s.cleared===1?'ROW':'ROWS'} · NICE MOVE`:'';return;
     }
     const s=animation?animation.sample():idle(fly.board);
     view.drawBoard(flyCtx,s);view.drawBoard(view.lcd.getContext('2d'),s,true);
     view.scene?.update(s,dt,!!animation&&running&&!paused,matchMedia('(prefers-reduced-motion: reduce)').matches);
-    $('fly-lines').textContent=animation?baseLines+s.lines:fly.lines;$('fly-pieces').textContent=animation?basePieces+s.pieces:fly.pieces;
+    $('opponent-lines').textContent=$('fly-lines').textContent=animation?baseLines+s.lines:fly.lines;$('opponent-pieces').textContent=$('fly-pieces').textContent=animation?basePieces+s.pieces:fly.pieces;
     $('fly-action').textContent=s.action?`${s.action.piece} → column ${s.action.x+1} · rotation ${s.action.rotation*90}°`:(running?'Thinking through the circuit…':'Match finished');
     $('fly-clear').textContent=s.cleared?`+${s.cleared} ${s.cleared===1?'ROW':'ROWS'} · NICE MOVE`:'';
   }
@@ -201,10 +201,13 @@
   $('match-again').addEventListener('click',setup);$('match-pause').addEventListener('click',()=>pause());
   $('match-fullscreen').addEventListener('click',()=>{if(document.fullscreenElement===arena)document.exitFullscreen().catch(()=>{});else arena.requestFullscreen?.().catch(()=>{});});
   document.querySelectorAll('[data-move]').forEach(b=>{
-    if(b.dataset.move!=='soft'){b.addEventListener('click',()=>control(b.dataset.move));return;}
-    b.addEventListener('pointerdown',e=>{e.preventDefault();if(!running||paused)return;b.setPointerCapture(e.pointerId);touchSoft=true;control('soft');});
-    for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>touchSoft=false);
-    b.addEventListener('click',e=>{if(e.detail===0)control('soft');});
+    const action=b.dataset.move;
+    b.addEventListener('pointerdown',e=>{
+      if(e.button!==0)return;e.preventDefault();if(!running||paused)return;
+      b.setPointerCapture(e.pointerId);held.set('pointer:'+e.pointerId,{action,age:0,next:170});b.classList.add('pressed');control(action);
+    });
+    for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,e=>{held.delete('pointer:'+e.pointerId);b.classList.remove('pressed');});
+    b.addEventListener('click',e=>{if(e.detail===0)control(action);});
   });
   $('keys-reset').addEventListener('click',()=>{bindings=structuredClone(V.defaultBindings);showBindings();savePreferences();$('match-error').textContent='';});
   $('match-download').addEventListener('click',()=>{if(!lastResult)return;const url=URL.createObjectURL(new Blob([JSON.stringify(lastResult,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`flytris-match-${lastResult.settings.seed}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
@@ -248,7 +251,7 @@
       if(flyIndex!==null)bot.step(scoreSession?scoreSession.flyRun.actions[flyIndex]:undefined);
       for(const state of held.values()){if(state.action==='left'||state.action==='right'){state.age+=50;while(state.age>=state.next){control(state.action);state.next+=65;}}}
       if(!running)break;
-      const soft=touchSoft||[...held.values()].some(s=>s.action==='soft');if(scoreSession)rankedLog+=soft?'S':'T';
+      const soft=[...held.values()].some(s=>s.action==='soft');if(scoreSession)rankedLog+=soft?'S':'T';
       human.tick(50,soft);rankedControls=0;rankedHard=false;
       if(!human.alive){finish('human-topout');break;}if(!fly.alive){finish('fly-topout');break;}
       if(elapsed>=settings.durationMs){finish('time');break;}
@@ -272,7 +275,7 @@
       }
       if(running){
         for(const state of held.values()){if(state.action==='left'||state.action==='right'){state.age+=activeDt;while(state.age>=state.next){control(state.action);state.next+=65;}}}
-        const soft=touchSoft||[...held.values()].some(s=>s.action==='soft');human.tick(activeDt,soft);
+        const soft=[...held.values()].some(s=>s.action==='soft');human.tick(activeDt,soft);
         if(!human.alive)finish('human-topout');
       }
       if(running){displayHuman();$('match-clock').textContent=clock(settings.durationMs-elapsed);if(elapsed>=settings.durationMs)finish('time');}
