@@ -30,6 +30,7 @@ node_modules/
 /public/*
 !/public/favicon.ico
 !/public/fly-head.svg
+!/public/social-preview.png
 /coverage/
 /.vercel/
 

@@ -50,5 +50,5 @@
     requestAnimationFrame(animate);
   }
   window.FlyReport={scene,lcd,drawBoard,pause(){timeline.pause();scene?.invalidate();draw();},restore:draw};
-  timeline.play();draw();requestAnimationFrame(animate);
+  if(document.querySelector('[data-flytris-route]')?.dataset.flytrisRoute!=='play')timeline.play();draw();requestAnimationFrame(animate);
 })();

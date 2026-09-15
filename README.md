@@ -22,7 +22,7 @@ npm run build
 npm run dev
 ```
 
-Open [localhost:8765](http://127.0.0.1:8765). The included `site-data/` snapshot
+Open [localhost:8765](http://127.0.0.1:8765) for the dashboard, or [/play](http://127.0.0.1:8765/play) to go directly to match setup. The included `site-data/` snapshot
 provides a trained model and recorded experiment; playing requires no Python,
 GPU, full connectome download or new training. Local scores use SQLite in
 `.local/leaderboard.sqlite`, which is excluded from Git.

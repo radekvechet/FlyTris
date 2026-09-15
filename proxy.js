@@ -9,4 +9,4 @@ export function proxy(request) {
   response.headers.set('Content-Security-Policy', csp);
   return response;
 }
-export const config = { matcher: ['/'] };
+export const config = { matcher: ['/', '/play'] };

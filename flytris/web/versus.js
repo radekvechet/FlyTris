@@ -7,6 +7,7 @@
   let opened=false,running=false,paused=false,worker=null,requestId=0,human,fly,settings,elapsed=0,animation=null,move=null,committed=false,baseLines=0,basePieces=0,lastResult=null,ready=false;
   let bindings=structuredClone(V.defaultBindings),scoreSession=null,startAttempt=0;
   let rankedLog='',rankedSequence=0,rankedVerifiedMs=0,rankedWaiting=false,rankedControls=0,rankedHard=false;
+  const route=document.querySelector('[data-flytris-route]')?.dataset.flytrisRoute;
   const held=new Map(),cookieName='flytris_preferences_v2';
   function clearHeld(){held.clear();document.querySelectorAll('.touch-controls .pressed').forEach(b=>b.classList.remove('pressed'));}
   const keySymbols={ArrowLeft:'←',ArrowRight:'→',ArrowUp:'↑',ArrowDown:'↓',Space:'Space',Enter:'↵ Enter',Escape:'Esc',ShiftLeft:'⇧ Left',ShiftRight:'⇧ Right'};
@@ -88,6 +89,7 @@
     view.scene?.reset();setup();
   }
   function close(){
+    if(route==='play'){window.location.assign('/');return;}
     startAttempt++;
     running=false;opened=false;clearHeld();stopWorker();arena.hidden=true;report.hidden=false;document.body.classList.remove('in-match');home.insertBefore(stage,anchor);view.scene?.reset();view.restore();window.FlyScores?.refresh();
     if(document.fullscreenElement===arena)document.exitFullscreen().catch(()=>{});$('versus-open').focus();
@@ -196,7 +198,7 @@
     window.FlyScores.complete(lastResult,scoreSession,()=>verifyProgress(true));
     animation=null;displayHuman();displayFly();$('match-summary').hidden=false;$('match-again').focus();
   }
-  $('versus-open').addEventListener('click',open);$('match-form').addEventListener('submit',start);
+  $('versus-open').addEventListener('click',()=>{if(route)window.location.assign('/play');else open();});$('match-form').addEventListener('submit',start);
   for(const id of ['match-exit','setup-back','result-back'])$(id).addEventListener('click',close);
   $('match-again').addEventListener('click',setup);$('match-pause').addEventListener('click',()=>pause());
   $('match-fullscreen').addEventListener('click',()=>{if(document.fullscreenElement===arena)document.exitFullscreen().catch(()=>{});else arena.requestFullscreen?.().catch(()=>{});});
@@ -281,5 +283,5 @@
       if(running){displayHuman();$('match-clock').textContent=clock(settings.durationMs-elapsed);if(elapsed>=settings.durationMs)finish('time');}
     }
     requestAnimationFrame(tick);
-  }loadPreferences();showBindings();requestAnimationFrame(tick);
+  }loadPreferences();showBindings();if(route==='play')open();requestAnimationFrame(tick);
 })();

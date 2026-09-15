@@ -91,3 +91,15 @@ separate from current match duration. The physics and trained weights are unchan
 
 See [SECURITY.md](SECURITY.md) for anti-cheat limits, abuse protection and the
 Vercel firewall rule that still needs dashboard configuration.
+
+## Game page, sharing and analytics
+
+The dashboard is at `/`; `/play` opens match setup directly and returns to `/`
+when a player exits. Both pages use server-rendered metadata and CSP nonces.
+`public/social-preview.png` is the shared Facebook/Open Graph and X large-card
+image. Commit this asset when updating the preview; social platforms may cache it.
+
+Production builds include `Analytics` from `@vercel/analytics/next`. Enable Web
+Analytics in the Vercel project dashboard and deploy to start collecting page
+views. Analytics is omitted in local development. Its production collection
+uses Vercel's same-origin endpoints, so the existing connection policy remains.
