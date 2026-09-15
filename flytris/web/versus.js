@@ -44,18 +44,11 @@
       const raw=document.cookie.split('; ').find(v=>v.startsWith(cookieName+'='));if(!raw)return;
       const p=JSON.parse(decodeURIComponent(raw.slice(cookieName.length+1)));
       if(![2,3,4].includes(p.version))return;
-      if(p.version===2&&p.durationMs===180000)p.durationMs=120000;
       bindings=K.normalize(p.bindings);
-      for(const [id,key] of [['human-pace','gravityMs'],['fly-pace','flyMs'],['fly-control-pace','flyControlMs'],['match-length','durationMs']]){
-        const input=$(id),value=p[key];if(!Number.isInteger(value)||value<50||(key!=='flyControlMs'&&value%50!==0))continue;
-        if(input.tagName==='SELECT'){if([...input.options].some(o=>Number(o.value)===value))input.value=value;}
-        else if(value<=Number(input.max))input.value=value;
-      }
-      window.FlyScores.syncPreset();
     }catch{/* Invalid or unavailable cookies leave safe defaults. */}
   }
   function savePreferences(){
-    const data=encodeURIComponent(JSON.stringify({version:4,bindings,...window.FlyScores.readSettings()}));
+    const data=encodeURIComponent(JSON.stringify({version:4,bindings}));
     try{document.cookie=`${cookieName}=${data}; Max-Age=31536000; Path=/; SameSite=Lax`;}catch{}
     const saved=document.cookie.split('; ').some(v=>v===cookieName+'='+data);
     $('preferences-status').textContent=saved?'Controls saved in this browser for one year.':'Cookie storage is unavailable here; settings will last for this open page.';
