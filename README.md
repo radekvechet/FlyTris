@@ -41,12 +41,12 @@ GPU, full connectome download or new training. Local scores use SQLite in
 
 **Current opponent:** the site uses the saved falling-rules checkpoint after 63
 generations. It moves and rotates through the same falling engine as the human,
-with a control every 300 ms on Easy, 400 ms on Medium and 100 ms on Hard.
+with a control every 800 ms on Easy, 500 ms on Medium and 360 ms on Hard.
 The whole fly simulation slows with its control tick, including gravity and
 landing delay; human timing stays unchanged. Ranked games use one of nine
 precomputed fly runs and server verification every ten seconds; the server
 calculates both scores. Practice runs fresh inference in a browser worker.
-Current leaderboards use rules version 7; older scores are preserved separately.
+Current leaderboards use rules version 9; older scores are preserved separately.
 See [SECURITY.md](SECURITY.md) for the limits of anti-cheat verification.
 
 The planned six-hour training run stopped at 3.19 hours on a Windows file lock.
@@ -152,9 +152,11 @@ recording generation all read this file.
 | `flyControlMs` | Real milliseconds per trained 50 ms fly step |
 | `durationMs` | Ranked match duration in milliseconds |
 
-Use positive multiples of 50 ms. Gravity is limited to 5,000 ms, fly control
-intervals to 1,000 ms, and ranked duration to 120,000 ms; duration must be divisible
-by the fly control interval. Effective fly gravity is `flyMs * flyControlMs / 50`.
+Gravity and match duration use positive multiples of 50 ms. Fly control intervals
+accept any whole number from 50 to 1,000 ms. Gravity is limited to 5,000 ms and
+ranked duration to 120,000 ms; the match may finish between fly actions. For example, a 350 ms fly tick works
+with a 120,000 ms match; only complete fly ticks are played. Actions are dispatched on the next 50 ms
+simulation boundary (up to 49 ms later), identically in the browser and server. Effective fly gravity is `flyMs * flyControlMs / 50`.
 Increase `rulesVersion` when changing defaults so earlier scores remain separate.
 `npm run dev` and `npm run build` regenerate stale ranked recordings automatically;
 commit the updated `site-data/ranked-pool.json` with your configuration. No new

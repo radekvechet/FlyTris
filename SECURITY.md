@@ -107,8 +107,8 @@ constrain result forgery and timing, not those forms of assistance. An
 anti-cheat-proof or identity-verified competition would need additional measures.
 
 The pool is generated offline and reused; the web server only simulates physics,
-not neural route search. Rules version 7 uses the shared `game-config.json` defaults: 300 ms
-fly actions on Easy, 400 ms on Medium and 100 ms on Hard.
+not neural route search. Rules version 9 uses the shared `game-config.json` defaults: 800 ms
+fly actions on Easy, 500 ms on Medium and 360 ms on Hard.
 The server derives cadence from the assigned difficulty, not client settings.
 Previous rules versions are excluded from current rankings. Full-length games normally make 12 checkpoint requests,
 plus start, finish and an optional name update. Each checkpoint uses a rate-limit

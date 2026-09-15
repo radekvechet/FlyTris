@@ -4,7 +4,8 @@ const model=require('../site-data/versus-model.json'),shapes=require('../site-da
 const config=require('../game-config.json');
 const runs=[];
 for(const [difficulty,preset] of Object.entries(config.presets))for(const seed of [810001,810002,810003]){
-  const {gravityMs,flyMs,flyControlMs:controlTickMs}=preset,durationMs=preset.durationMs*50/controlTickMs;
+  // A match can finish between fly actions; only simulate complete control ticks.
+  const {gravityMs,flyMs,flyControlMs:controlTickMs}=preset,durationMs=Math.floor(preset.durationMs/controlTickMs)*50;
   const start=performance.now(),r=F.play(model,shapes,model.weights,seed,flyMs,{durationMs,record:true});
   const actions=r.trace.flatMap(t=>t.actions);while(actions.length<Math.floor(preset.durationMs/controlTickMs)&&r.alive)actions.push('wait');
   runs.push({id:difficulty+'-'+seed,difficulty,seed,gravityMs,flyMs,controlTickMs,durationMs:preset.durationMs,actions,lines:r.lines,pieces:r.pieces});

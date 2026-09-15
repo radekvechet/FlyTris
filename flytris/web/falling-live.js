@@ -68,7 +68,8 @@
   }
   const config=typeof module!=='undefined'&&module.exports?require('../../game-config.json'):root.FLYTRIS_CONFIG;
   const controlTickMs=difficulty=>config.presets[difficulty]?.flyControlMs||50;
-  const actionIndex=(elapsedMs,tickMs)=>elapsedMs>0&&elapsedMs%tickMs===0?elapsedMs/tickMs-1:null;
+  // Dispatch each due action once on the shared 50 ms clock, including 360 ms etc.
+  const actionIndex=(elapsedMs,tickMs)=>elapsedMs>0&&Math.floor(elapsedMs/tickMs)>Math.floor((elapsedMs-50)/tickMs)?Math.floor(elapsedMs/tickMs)-1:null;
   const api={Controller,ReplayTimeline,plan,snapshot,restore,controlTickMs,actionIndex,RANKED_RULES:config.rulesVersion};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.FlyFallingLive=api;
 })(typeof window!=='undefined'?window:globalThis);

@@ -47,7 +47,7 @@
       if(p.version===2&&p.durationMs===180000)p.durationMs=120000;
       bindings=K.normalize(p.bindings);
       for(const [id,key] of [['human-pace','gravityMs'],['fly-pace','flyMs'],['fly-control-pace','flyControlMs'],['match-length','durationMs']]){
-        const input=$(id),value=p[key];if(!Number.isInteger(value)||value<50||value%50!==0)continue;
+        const input=$(id),value=p[key];if(!Number.isInteger(value)||value<50||(key!=='flyControlMs'&&value%50!==0))continue;
         if(input.tagName==='SELECT'){if([...input.options].some(o=>Number(o.value)===value))input.value=value;}
         else if(value<=Number(input.max))input.value=value;
       }
@@ -132,8 +132,11 @@
     if(!running)return;
     if(scoreSession){ready=true;return;}
     if(!fly.alive){finish('fly-topout');return;}
+    const remainingFlySteps=falling?Math.floor(settings.durationMs/settings.flyControlMs)-Math.floor(elapsed/settings.flyControlMs):0;
+    // Let the human clock finish when no further fly action is due.
+    if(falling&&remainingFlySteps===0){ready=true;return;}
     const id=++requestId;ready=false;
-    worker.postMessage(falling?{type:'choose',id,snapshot:bot.snapshot(),remainingMs:(settings.durationMs-elapsed)*50/settings.flyControlMs}:{type:'choose',id,board:fly.board,piece:fly.piece});
+    worker.postMessage(falling?{type:'choose',id,snapshot:bot.snapshot(),remainingMs:remainingFlySteps*50}:{type:'choose',id,board:fly.board,piece:fly.piece});
   }
   function receive(data){
     if(!running||data.id!==requestId)return;

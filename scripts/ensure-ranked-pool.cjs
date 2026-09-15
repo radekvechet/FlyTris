@@ -3,7 +3,11 @@ const config=require('../game-config.json'),model=require('../site-data/versus-m
 if(!Number.isInteger(config.rulesVersion)||config.rulesVersion<6||!Object.hasOwn(config.presets,config.defaultDifficulty))throw Error('Invalid game config version or default difficulty.');
 for(const difficulty of ['easy','medium','hard']){
   const p=config.presets[difficulty];
-  if(!p||!['gravityMs','flyMs','flyControlMs','durationMs'].every(k=>Number.isInteger(p[k])&&p[k]>=50&&p[k]%50===0)||p.gravityMs>5000||p.flyMs>5000||p.flyControlMs>1000||p.durationMs>120000||p.durationMs%p.flyControlMs!==0)throw Error(`Invalid ${difficulty} preset: use positive 50 ms multiples, gravity at most 5000 ms, fly controls at most 1000 ms, duration at most 120000 ms and divisible by flyControlMs.`);
+  for(const [field,max] of Object.entries({gravityMs:5000,flyMs:5000,flyControlMs:1000,durationMs:120000})){
+    const value=p?.[field];
+    const multiple=field!=='flyControlMs';
+    if(!Number.isInteger(value)||value<50||value>max||(multiple&&value%50!==0))throw Error(`Invalid ${difficulty}.${field}: ${value}. Use ${multiple?'a multiple of 50':'whole'} milliseconds between 50 and ${max}.`);
+  }
 }
 const configHash=crypto.createHash('sha256').update(JSON.stringify(config)).digest('hex');
 let pool;try{pool=JSON.parse(fs.readFileSync('site-data/ranked-pool.json','utf8'));}catch{}

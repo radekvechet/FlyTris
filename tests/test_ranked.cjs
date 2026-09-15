@@ -99,12 +99,33 @@ test('ranked cadence comes from the server and retired rules cannot start or ent
     assert.equal((await f.service.leaderboard('all')).summary.matches,0);
   }finally{f.db.close();}
 });
+test('350 and 360 ms intervals dispatch every complete action once without drifting',()=>{
+  const L=require('../flytris/web/falling-live.js');
+  for(const interval of [350,360]){
+    const indices=[];
+    for(let elapsed=50;elapsed<=120000;elapsed+=50){
+      const index=L.actionIndex(elapsed,interval);
+      if(index!==null){indices.push(index);assert(elapsed>=(index+1)*interval);assert(elapsed-(index+1)*interval<50);}
+    }
+    assert.deepEqual(indices,Array.from({length:Math.floor(120000/interval)},(_,i)=>i));
+  }
+});
+test('a match ending between fly ticks verifies without an extra action',()=>{
+  const L=require('../flytris/web/falling-live.js'),shapes=require('../site-data/shapes.json');
+  const source=pool.runs.find(r=>r.controlTickMs>50);
+  const run={...source,durationMs:Math.ceil(source.controlTickMs*3/50)*50+50};
+  const bot=new L.Controller(run.seed,shapes,run.flyMs);
+  for(const action of run.actions.slice(0,3))bot.step(action);
+  const state=verify.advance(verify.initial(run),'BT'.repeat(run.durationMs/50),run);
+  assert.equal(state.reason,'time');assert.equal(state.elapsedMs,run.durationMs);
+  assert.deepEqual(state.fly,L.snapshot(bot.player,run.seed));
+});
 test('every committed fly run reproduces its published score at its assigned pace',()=>{
   const L=require('../flytris/web/falling-live.js'),shapes=require('../site-data/shapes.json');
   for(const run of pool.runs){
     const bot=new L.Controller(run.seed,shapes,run.flyMs);
     assert.equal(run.controlTickMs,L.controlTickMs(run.difficulty));
-    assert.equal(run.actions.length,run.durationMs/run.controlTickMs);
+    assert.equal(run.actions.length,Math.floor(run.durationMs/run.controlTickMs));
     for(let elapsed=50;elapsed<=120000;elapsed+=50){
       const index=L.actionIndex(elapsed,run.controlTickMs);
       if(index!==null)bot.step(run.actions[index]);

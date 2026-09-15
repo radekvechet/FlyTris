@@ -45,7 +45,7 @@ by Git. `npm run start` serves a production build; production mode requires Neon
 
 Ranked presets last **two minutes** at 800/500/250 ms gravity for Easy/Medium/Hard.
 The human and verification clock use 50 ms simulation steps. The fly advances
-one trained step every 300/400/100 ms for Easy/Medium/Hard. Its falling and landing
+one trained step every 800/500/360 ms for Easy/Medium/Hard. Its falling and landing
 timing scale with that interval. Defaults live in `game-config.json`; dev and
 production builds regenerate stale ranked recordings. Increment `rulesVersion`
 when changing defaults. Only exact presets qualify for the scoreboard.
@@ -67,7 +67,7 @@ when changing defaults. Only exact presets qualify for the scoreboard.
    returns the server-calculated position in the last-24-hours scoreboard for that
    difficulty; the UI replaces the name form with a congratulations message.
 
-Only `rules_version=7` (checkpoint-verified matches under the current configured defaults) enters current leaderboards.
+Only `rules_version=9` (checkpoint-verified matches under the current configured defaults) enters current leaderboards.
 Earlier rows, including matches from earlier rules versions and unfinished sessions, remain intact
 but do not enter the current leaderboard. No database migration is required.
 Ranking uses lines, pieces, then earlier completion time. Rolling 24-hour, 7-day,
